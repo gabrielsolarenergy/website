@@ -1,0 +1,324 @@
+@import "@fontsource/outfit/400.css";
+@import "@fontsource/outfit/500.css";
+@import "@fontsource/outfit/600.css";
+@import "@fontsource/outfit/700.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+@layer base {
+  :root {
+    /* Core Brand Colors */
+    --primary: 147 65% 22%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Accent Green - Bright eco-green for CTAs */
+    --accent: 142 76% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Background & Surfaces */
+    --background: 0 0% 100%;
+    --foreground: 220 20% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 15%;
+
+    /* Secondary - Light gray-green */
+    --secondary: 140 15% 96%;
+    --secondary-foreground: 147 65% 22%;
+
+    /* Muted surfaces */
+    --muted: 140 10% 95%;
+    --muted-foreground: 220 10% 45%;
+
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders & Inputs */
+    --border: 140 10% 90%;
+    --input: 140 10% 90%;
+    --ring: 147 65% 22%;
+
+    --radius: 0.75rem;
+
+    /* Hero Section - Dark Navy */
+    --hero: 220 35% 12%;
+    --hero-foreground: 0 0% 100%;
+
+    /* Success/Stats colors */
+    --success: 142 76% 45%;
+    --success-foreground: 0 0% 100%;
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 220 20% 25%;
+    --sidebar-primary: 147 65% 22%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 140 15% 96%;
+    --sidebar-accent-foreground: 147 65% 22%;
+    --sidebar-border: 140 10% 90%;
+    --sidebar-ring: 147 65% 22%;
+  }
+
+  .dark {
+    --primary: 142 76% 45%;
+    --primary-foreground: 220 35% 12%;
+
+    --accent: 147 65% 35%;
+    --accent-foreground: 0 0% 100%;
+
+    --background: 220 35% 8%;
+    --foreground: 0 0% 95%;
+
+    --card: 220 35% 12%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 220 35% 12%;
+    --popover-foreground: 0 0% 95%;
+
+    --secondary: 220 25% 18%;
+    --secondary-foreground: 142 76% 45%;
+
+    --muted: 220 25% 20%;
+    --muted-foreground: 220 10% 65%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 25% 20%;
+    --input: 220 25% 20%;
+    --ring: 142 76% 45%;
+
+    --hero: 220 35% 6%;
+    --hero-foreground: 0 0% 100%;
+
+    --success: 142 76% 45%;
+    --success-foreground: 220 35% 12%;
+
+    --sidebar-background: 220 35% 10%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 142 76% 45%;
+    --sidebar-primary-foreground: 220 35% 12%;
+    --sidebar-accent: 220 25% 18%;
+    --sidebar-accent-foreground: 0 0% 90%;
+    --sidebar-border: 220 25% 20%;
+    --sidebar-ring: 142 76% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-display font-semibold tracking-tight;
+  }
+}
+
+@layer components {
+  .container-section {
+    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-padding {
+    @apply py-16 md:py-24;
+  }
+
+  .gradient-hero {
+    /* Gradient diagonal de la un verde "padure" spre verdele brandului */
+    background: linear-gradient(135deg, #245c33 0%, #1a4925 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Opțional: Adaugă un pattern subtil peste gradient pentru a părea mai "tehnic" */
+  .gradient-hero::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(
+      rgba(255, 255, 255, 0.1) 1px,
+      transparent 1px
+    );
+    background-size: 30px 30px; /* Puncte subtile tip grilă */
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  .gradient-primary {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary)) 0%,
+      hsl(147 55% 28%) 100%
+    );
+  }
+
+  .gradient-accent {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--accent)) 0%,
+      hsl(142 65% 35%) 100%
+    );
+  }
+
+  .card-shadow {
+    box-shadow: 0 4px 20px -4px hsl(var(--primary) / 0.08);
+  }
+
+  .card-shadow-hover {
+    box-shadow: 0 8px 30px -4px hsl(var(--primary) / 0.15);
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(
+      135deg,
+      hsl(var(--accent)) 0%,
+      hsl(147 65% 30%) 100%
+    );
+  }
+
+  /* Efect de gradient diagonal secundar care face primul și ultimul cuvânt verde */
+  /* Simulează o rază de soare care taie textul pe diagonala secundară (135deg) */
+  /* Gradient de la dreapta la stânga */
+  .text-gradient-diagonal {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 1) 0%,
+      rgba(255, 255, 255, 1) 25%,
+      hsl(var(--accent)) 30%,
+      hsl(var(--accent)) 70%,
+      rgba(255, 255, 255, 1) 75%,
+      rgba(255, 255, 255, 1) 100%
+    );
+    /* Background-size fix pentru poziționare consistentă */
+    background-size: 200% 200%;
+    /* Poziționare fixă relativă la text - gradientul verde la dreapta */
+    background-position: 100% 50%;
+    /* Asigură că gradientul rămâne în aceeași poziție relativă la text */
+    background-attachment: local;
+  }
+
+  .glow-accent {
+    box-shadow: 0 0 40px hsl(var(--accent) / 0.3);
+  }
+
+  .badge-eco {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-accent/10 text-accent;
+  }
+
+  .stat-card {
+    @apply bg-card rounded-2xl p-6 card-shadow border border-border/50 transition-all duration-300 hover:card-shadow-hover;
+  }
+
+  .project-card {
+    @apply relative overflow-hidden rounded-2xl bg-card card-shadow transition-all duration-300 hover:card-shadow-hover hover:-translate-y-1;
+  }
+
+  .filter-tab {
+    @apply px-4 py-2 rounded-full text-sm font-medium transition-all duration-200;
+  }
+
+  .filter-tab-active {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  .filter-tab-inactive {
+    @apply bg-secondary text-muted-foreground hover:bg-secondary/80;
+  }
+}
+
+@layer utilities {
+  .animate-fade-up {
+    animation: fadeUp 0.6s ease-out forwards;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.4s ease-out forwards;
+  }
+
+  .animation-delay-100 {
+    animation-delay: 100ms;
+  }
+
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

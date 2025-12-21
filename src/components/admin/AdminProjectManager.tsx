@@ -1,0 +1,485 @@
+import React, { useState, useEffect } from "react";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Search,
+  Loader2,
+  Image as ImageIcon,
+  Save,
+  MapPin,
+  Zap,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { adminAPI } from "@/lib/api";
+import CustomPagination from "@/components/common/CustomPagination";
+import { cn } from "@/lib/utils";
+
+interface Project {
+  id: string;
+  title: string;
+  description: string;
+  location: string;
+  category: string;
+  capacity_kw: number;
+  panels_count: number;
+  investment_value: number;
+  status: string;
+  image_url: string;
+  created_at: string;
+}
+
+const ITEMS_PER_PAGE = 6;
+const projectCategories = ["Rezidențial", "Comercial", "Industrial", "Agricol"];
+const statusOptions = [
+  { value: "completed", label: "Finalizat" },
+  { value: "in_progress", label: "În Desfășurare" },
+  { value: "planning", label: "Planificare" },
+];
+
+export const AdminProjectManager = () => {
+  const { toast } = useToast();
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // --- State Paginare Server-Side ---
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    location: "",
+    category: "",
+    capacity_kw: "",
+    panels_count: "",
+    investment_value: "",
+    status: "completed",
+    image_url: "",
+  });
+
+  // --- Încărcare Date (Server-Side Pagination) ---
+  const fetchProjects = async () => {
+    setIsLoading(true);
+    try {
+      // Trimitem pagina curentă către backend
+      const { data, error } = await adminAPI.getProjects(
+        undefined,
+        currentPage,
+        ITEMS_PER_PAGE
+      );
+
+      if (error) throw new Error(error);
+
+      // Verificăm dacă backend-ul trimite obiectul structurat { items, total }
+      if (data && data.items) {
+        setProjects(data.items);
+        setTotalItems(data.total);
+      } else {
+        // Fallback pentru listă simplă
+        setProjects(data || []);
+        setTotalItems(data?.length || 0);
+      }
+    } catch (e: any) {
+      toast({
+        title: "Eroare încărcare",
+        description: e.message || "Nu s-au putut prelua proiectele.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Re-executăm fetch-ul când se schimbă pagina
+  useEffect(() => {
+    fetchProjects();
+  }, [currentPage]);
+
+  const handleSave = async () => {
+    if (
+      !formData.title.trim() ||
+      !formData.category ||
+      !formData.location.trim()
+    ) {
+      toast({
+        title: "Câmpuri lipsă",
+        description: "Te rugăm să completezi Titlul, Categoria și Locația.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const projectData = {
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        location: formData.location.trim(),
+        category: formData.category,
+        capacity_kw: parseFloat(formData.capacity_kw) || 0,
+        panels_count: parseInt(formData.panels_count) || 0,
+        investment_value: parseFloat(formData.investment_value) || 0,
+        status: formData.status,
+        image_url: formData.image_url.trim() || null,
+      };
+
+      const result = editingProject
+        ? await adminAPI.updateProject(editingProject.id, projectData)
+        : await adminAPI.createProject(projectData);
+
+      if (result.error) throw new Error(result.error);
+
+      toast({
+        title: "Succes",
+        description: editingProject ? "Proiect actualizat." : "Proiect creat.",
+      });
+
+      setIsEditorOpen(false);
+      fetchProjects();
+    } catch (e: any) {
+      toast({
+        title: "Eroare la salvare",
+        description: e.message || "Eroare la comunicarea cu serverul.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCreate = () => {
+    setEditingProject(null);
+    setFormData({
+      title: "",
+      description: "",
+      location: "",
+      category: "",
+      capacity_kw: "",
+      panels_count: "",
+      investment_value: "",
+      status: "completed",
+      image_url: "",
+    });
+    setIsEditorOpen(true);
+  };
+
+  const handleEdit = (project: Project) => {
+    setEditingProject(project);
+    setFormData({
+      title: project.title || "",
+      description: project.description || "",
+      location: project.location || "",
+      category: project.category || "",
+      capacity_kw: project.capacity_kw?.toString() || "0",
+      panels_count: project.panels_count?.toString() || "0",
+      investment_value: project.investment_value?.toString() || "0",
+      status: project.status || "completed",
+      image_url: project.image_url || "",
+    });
+    setIsEditorOpen(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Sigur ștergi acest proiect?")) return;
+    try {
+      const { error } = await adminAPI.deleteProject(id);
+      if (error) throw new Error(error);
+      toast({ title: "Șters", description: "Proiectul a fost eliminat." });
+      fetchProjects();
+    } catch (e: any) {
+      toast({
+        title: "Eroare",
+        description: e.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Filtrare locală (doar pe bucata de date primită)
+  const filteredProjects = projects.filter(
+    (p) =>
+      p.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.category?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+
+  return (
+    <div className="space-y-6">
+      {/* Search & Add Bar */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border shadow-sm">
+        <div className="relative w-full sm:max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Input
+            placeholder="Caută în pagina curentă..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 rounded-xl"
+          />
+        </div>
+        <Button
+          onClick={handleCreate}
+          className="bg-[#1a4925] hover:bg-[#1a4925]/90 rounded-xl font-bold"
+        >
+          <Plus className="w-4 h-4 mr-2" /> Adaugă Proiect
+        </Button>
+      </div>
+
+      {/* Grid Proiecte */}
+      {isLoading ? (
+        <div className="flex justify-center py-20">
+          <Loader2 className="animate-spin text-[#1a4925]" />
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredProjects.map((project) => (
+              <div
+                key={project.id}
+                className="bg-white rounded-3xl border border-slate-100 overflow-hidden hover:shadow-md transition-shadow"
+              >
+                <div className="aspect-video relative bg-slate-100">
+                  {project.image_url ? (
+                    <img
+                      src={project.image_url}
+                      alt={project.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-300">
+                      <ImageIcon />
+                    </div>
+                  )}
+                  <div className="absolute top-3 left-3">
+                    <span className="bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-black uppercase text-[#1a4925] shadow-sm">
+                      {project.category}
+                    </span>
+                  </div>
+                </div>
+                <div className="p-5 space-y-3">
+                  <h3 className="font-bold text-slate-900 line-clamp-1">
+                    {project.title}
+                  </h3>
+                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                    <MapPin className="w-3 h-3" /> {project.location}
+                  </div>
+                  <div className="flex justify-between items-center pt-3 border-t">
+                    <div className="flex items-center gap-1 text-[#1a4925] font-bold text-sm">
+                      <Zap className="w-3 h-3" /> {project.capacity_kw} kW
+                    </div>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handleEdit(project)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-red-500 hover:text-red-600"
+                        onClick={() => handleDelete(project.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Pagination afișată mereu dacă există pagini */}
+          {totalPages > 0 && (
+            <div className="mt-8 border-t pt-8">
+              <CustomPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+              <p className="text-center text-[10px] text-slate-400 mt-4 font-black uppercase tracking-widest">
+                Pagina {currentPage} din {totalPages} — Total: {totalItems}{" "}
+                proiecte
+              </p>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Dialog Editor */}
+      <Dialog open={isEditorOpen} onOpenChange={setIsEditorOpen}>
+        <DialogContent className="max-w-2xl rounded-[2rem] p-8 max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-black uppercase tracking-tighter">
+              Editor Proiect
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+            <div className="md:col-span-2 space-y-2">
+              <Label className="text-[10px] font-black uppercase text-slate-400">
+                Titlu Proiect *
+              </Label>
+              <Input
+                className="rounded-xl"
+                value={formData.title}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-[10px] font-black uppercase text-slate-400">
+                Categorie *
+              </Label>
+              <Select
+                value={formData.category}
+                onValueChange={(v) => setFormData({ ...formData, category: v })}
+              >
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue placeholder="Alege..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {projectCategories.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-[10px] font-black uppercase text-slate-400">
+                Status
+              </Label>
+              <Select
+                value={formData.status}
+                onValueChange={(v) => setFormData({ ...formData, status: v })}
+              >
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {statusOptions.map((s) => (
+                    <SelectItem key={s.value} value={s.value}>
+                      {s.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="md:col-span-2 space-y-2">
+              <Label className="text-[10px] font-black uppercase text-slate-400">
+                Locație *
+              </Label>
+              <Input
+                className="rounded-xl"
+                value={formData.location}
+                onChange={(e) =>
+                  setFormData({ ...formData, location: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-[10px] font-black uppercase text-slate-400">
+                Capacitate (kW)
+              </Label>
+              <Input
+                type="number"
+                className="rounded-xl"
+                value={formData.capacity_kw}
+                onChange={(e) =>
+                  setFormData({ ...formData, capacity_kw: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-[10px] font-black uppercase text-slate-400">
+                Nr. Panouri
+              </Label>
+              <Input
+                type="number"
+                className="rounded-xl"
+                value={formData.panels_count}
+                onChange={(e) =>
+                  setFormData({ ...formData, panels_count: e.target.value })
+                }
+              />
+            </div>
+            <div className="md:col-span-2 space-y-2">
+              <Label className="text-[10px] font-black uppercase text-slate-400">
+                URL Imagine
+              </Label>
+              <Input
+                className="rounded-xl"
+                value={formData.image_url}
+                onChange={(e) =>
+                  setFormData({ ...formData, image_url: e.target.value })
+                }
+                placeholder="https://..."
+              />
+            </div>
+            <div className="md:col-span-2 space-y-2">
+              <Label className="text-[10px] font-black uppercase text-slate-400">
+                Descriere
+              </Label>
+              <Textarea
+                className="rounded-2xl min-h-[100px]"
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="ghost"
+              onClick={() => setIsEditorOpen(false)}
+              disabled={isSaving}
+            >
+              Anulează
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="bg-[#1a4925] px-8 rounded-xl font-bold"
+            >
+              {isSaving ? (
+                <Loader2 className="animate-spin mr-2 w-4 h-4" />
+              ) : (
+                <Save className="mr-2 w-4 h-4" />
+              )}{" "}
+              Salvează
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
