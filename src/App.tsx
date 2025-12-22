@@ -11,7 +11,6 @@ import { cn } from "@/lib/utils";
 import { Header } from "@/components/layout/Header";
 import ChatWidget from "./components/chat/ChatWidget";
 import WhatsAppButton from "./components/chat/WhatsAppButton";
-import AdminLayout from "./components/layout/AdminLayout";
 
 // Pagini Publice
 import Home from "./pages/Home";
@@ -57,7 +56,7 @@ const queryClient = new QueryClient();
 const AppContent = () => {
   const location = useLocation();
 
-  // Definim paginile unde vrem un comportament special
+  // Definim rutele unde NU vrem să afișăm Header-ul (Login, Register etc.)
   const isAuthPath = [
     "/login",
     "/register",
@@ -65,7 +64,11 @@ const AppContent = () => {
     "/forgot-password",
     "/reset-password",
   ].includes(location.pathname);
+
+  // Verificăm dacă suntem în panoul de admin
   const isAdminPath = location.pathname.startsWith("/admin");
+
+  // Definim paginile care au Hero Section (unde nu punem padding de sus pentru header)
   const hasHeroPath = [
     "/",
     "/systems",
@@ -79,13 +82,16 @@ const AppContent = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header-ul este acum global și apare peste tot (inclusiv Dashboard și Admin) */}
-      <Header />
+      {/* MODIFICARE: Header-ul se randează doar dacă NU suntem pe o pagină de Auth.
+          Dacă vrei să îl ascunzi și în Admin, poți pune: {!isAuthPath && !isAdminPath && <Header />}
+      */}
+      {!isAuthPath && <Header />}
 
       <main
         className={cn(
           "flex-grow",
-          // Punem padding DOAR dacă NU este o pagină cu Hero și NU este pagina de Login
+          // Punem padding pentru a nu intra conținutul sub Header-ul fix
+          // DOAR dacă NU avem Hero (care e full screen) și NU suntem pe Auth (unde nu e Header)
           !hasHeroPath && !isAuthPath ? "pt-20 md:pt-28" : ""
         )}
       >
@@ -207,7 +213,6 @@ const AppContent = () => {
             }
           />
 
-          {/* Rută specială Chat Admin cu Layout specific dacă e necesar */}
           <Route
             path="/admin/chat"
             element={
@@ -228,7 +233,7 @@ const AppContent = () => {
         </Routes>
       </main>
 
-      {/* Widget-urile apar pe paginile publice și dashboard, dar le ascundem în fluxul de Login/Admin */}
+      {/* Widget-urile apar pe paginile publice și dashboard, dar le ascundem în Auth și Admin */}
       {!isAuthPath && !isAdminPath && (
         <>
           <ChatWidget />
