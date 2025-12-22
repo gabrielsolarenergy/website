@@ -15,7 +15,6 @@ import { toast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
 
-// Imagine optimizată
 import contactHeroImage from "@/assets/commercial-solar.jpg";
 
 const contactInfo = [
@@ -29,26 +28,16 @@ const contactInfo = [
   { icon: Clock, title: "Program", details: ["Luni - Vineri: 08:00 - 18:00"] },
 ];
 
-const propertyTypes = [
-  "Casă rezidențială",
-  "Clădire comercială",
-  "Unitate industrială",
-  "Agricol / Fermă",
-];
-const interests = [
-  "Instalație nouă",
-  "Upgrade sistem",
-  "Mentenanță",
-  "Finanțare",
-];
+const propertyTypes = ["Rezidențial", "Comercial", "Industrial", "Agricol"];
+const interests = ["Instalație nouă", "Upgrade", "Mentenanță", "Finanțare"];
 
 const contactSchema = z.object({
   firstName: z.string().trim().min(1, "Obligatoriu"),
   lastName: z.string().trim().min(1, "Obligatoriu"),
-  email: z.string().trim().email("Email invalid"),
+  email: z.string().trim().email("Invalid"),
   phone: z.string().trim().min(10, "Minim 10 cifre"),
-  propertyType: z.string().min(1, "Selectați tipul"),
-  interest: z.string().min(1, "Selectați motivul"),
+  propertyType: z.string().min(1, "Selectați"),
+  interest: z.string().min(1, "Selectați"),
   message: z.string().trim().optional(),
 });
 
@@ -85,8 +74,7 @@ export default function Contact() {
     setIsSubmitting(true);
     try {
       contactSchema.parse(formData);
-      // Logică API aici
-      toast({ title: "Cerere trimisă!", description: "Revenim în 24h." });
+      toast({ title: "Cerere trimisă!", description: "Vă contactăm curând." });
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: any = {};
@@ -102,227 +90,217 @@ export default function Contact() {
 
   return (
     <Layout>
-      <div className="overflow-x-hidden w-full">
-        {" "}
-        {/* Container anti-scroll orizontal */}
-        {/* Hero Section - Full Responsive */}
-        <section className="relative min-h-[500px] lg:min-h-[70vh] flex items-center bg-slate-900">
+      {/* Wrapper anti-overflow care forțează lățimea corectă pe mobil */}
+      <div className="overflow-x-hidden w-full max-w-[100vw]">
+        {/* Hero Section - Adaptat pentru text lung pe mobil */}
+        <section className="relative min-h-[450px] lg:min-h-[60vh] flex items-center bg-slate-900">
           <div className="absolute inset-0 z-0">
             <img
               src={contactHeroImage}
-              alt="Contact Gabriel Solar Energy"
-              className="w-full h-full object-cover"
+              alt="Gabriel Solar Contact"
+              className="w-full h-full object-cover opacity-60"
               loading="eager"
               fetchPriority="high"
               width="1920"
               height="1080"
             />
-            <div className="absolute inset-0 bg-black/70 md:bg-gradient-to-r md:from-slate-900 md:via-slate-900/80 md:to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent md:bg-gradient-to-r" />
           </div>
 
-          <div className="container mx-auto relative z-10 px-4 pt-20">
+          <div className="container mx-auto relative z-10 px-4">
             <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 bg-accent/20 backdrop-blur-md border border-accent/30 px-4 py-1.5 rounded-full mb-6">
-                <Phone className="w-4 h-4 text-accent" aria-hidden="true" />
-                <span className="text-white text-xs font-bold uppercase tracking-widest">
-                  Suport 24/7
-                </span>
-              </div>
-              <h1 className="font-display font-bold text-white mb-6 leading-[1.1] text-4xl sm:text-5xl lg:text-7xl">
+              <h1 className="font-display font-bold text-white leading-tight text-3xl xs:text-4xl sm:text-5xl lg:text-7xl mb-4">
                 Obțineți oferta{" "}
-                <span className="text-accent">solară gratuită.</span>
+                <span className="text-accent block xs:inline">
+                  solară gratuită.
+                </span>
               </h1>
-              <p className="text-white/80 mb-8 text-lg md:text-xl max-w-xl">
-                Sunteți gata să economisiți? Experții noștri vă vor oferi o
-                ofertă personalizată în 24 de ore.
+              <p className="text-slate-200 text-base sm:text-lg max-w-xl opacity-90">
+                Experții noștri revin cu o ofertă personalizată în maximum 24 de
+                ore.
               </p>
             </div>
           </div>
         </section>
-        {/* Form & Sidebar Grid - Full Responsive */}
-        <section className="py-16 md:py-24 bg-slate-50 px-4">
-          <div className="container mx-auto max-w-7xl">
-            <div className="grid lg:grid-cols-12 gap-8 lg:gap-12">
-              {/* Form Column */}
-              <div className="lg:col-span-8 order-2 lg:order-1">
-                <div className="bg-white rounded-3xl p-6 md:p-12 shadow-xl border border-slate-100">
-                  <h2 className="font-display text-3xl font-bold text-slate-900 mb-8">
+
+        {/* Secțiunea principală - Adaptată pentru ecrane înguste */}
+        <section className="py-8 sm:py-16 md:py-24 bg-slate-50">
+          <div className="container mx-auto px-3 sm:px-6 max-w-7xl">
+            <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6 sm:gap-10">
+              {/* Form Column - Prioritar pe Mobil */}
+              <div className="lg:col-span-7 xl:col-span-8 order-1">
+                <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-12 shadow-lg border border-slate-100">
+                  <h2 className="font-display text-2xl sm:text-3xl font-bold text-slate-900 mb-6 sm:mb-8">
                     Solicită Oferta
                   </h2>
 
                   <form
                     onSubmit={handleSubmit}
-                    className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+                    className="space-y-4 sm:space-y-6"
                   >
-                    <div className="space-y-2">
-                      <label
-                        htmlFor="firstName"
-                        className="text-xs font-black uppercase text-slate-400"
-                      >
-                        Prenume *
-                      </label>
-                      <input
-                        id="firstName"
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleChange}
-                        className={cn(
-                          "w-full px-5 py-4 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:ring-2 focus:ring-primary/20",
-                          errors.firstName && "border-destructive"
-                        )}
-                      />
+                    <div className="grid grid-cols-1 xs:grid-cols-2 gap-4 sm:gap-6">
+                      <div className="space-y-1.5">
+                        <label
+                          htmlFor="firstName"
+                          className="text-[10px] sm:text-xs font-black uppercase text-slate-400"
+                        >
+                          Prenume *
+                        </label>
+                        <input
+                          id="firstName"
+                          name="firstName"
+                          value={formData.firstName}
+                          onChange={handleChange}
+                          className={cn(
+                            "w-full px-4 py-3 sm:py-4 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none focus:ring-2 focus:ring-primary/20",
+                            errors.firstName && "border-destructive"
+                          )}
+                          placeholder="Ex: Ion"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label
+                          htmlFor="lastName"
+                          className="text-[10px] sm:text-xs font-black uppercase text-slate-400"
+                        >
+                          Nume *
+                        </label>
+                        <input
+                          id="lastName"
+                          name="lastName"
+                          value={formData.lastName}
+                          onChange={handleChange}
+                          className={cn(
+                            "w-full px-4 py-3 sm:py-4 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none focus:ring-2 focus:ring-primary/20",
+                            errors.lastName && "border-destructive"
+                          )}
+                          placeholder="Ex: Popescu"
+                        />
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <label
-                        htmlFor="lastName"
-                        className="text-xs font-black uppercase text-slate-400"
-                      >
-                        Nume *
-                      </label>
-                      <input
-                        id="lastName"
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleChange}
-                        className={cn(
-                          "w-full px-5 py-4 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:ring-2 focus:ring-primary/20",
-                          errors.lastName && "border-destructive"
-                        )}
-                      />
+
+                    <div className="grid grid-cols-1 xs:grid-cols-2 gap-4 sm:gap-6">
+                      <div className="space-y-1.5">
+                        <label
+                          htmlFor="email"
+                          className="text-[10px] sm:text-xs font-black uppercase text-slate-400"
+                        >
+                          Email *
+                        </label>
+                        <input
+                          id="email"
+                          name="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 sm:py-4 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none"
+                          placeholder="email@exemplu.ro"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label
+                          htmlFor="phone"
+                          className="text-[10px] sm:text-xs font-black uppercase text-slate-400"
+                        >
+                          Telefon *
+                        </label>
+                        <input
+                          id="phone"
+                          name="phone"
+                          type="tel"
+                          value={formData.phone}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 sm:py-4 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none"
+                          placeholder="07xx xxx xxx"
+                        />
+                      </div>
                     </div>
-                    <div className="space-y-2 sm:col-span-2 md:col-span-1">
-                      <label
-                        htmlFor="email"
-                        className="text-xs font-black uppercase text-slate-400"
-                      >
-                        Email *
-                      </label>
-                      <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="w-full px-5 py-4 rounded-xl border border-slate-200 bg-slate-50 outline-none"
-                      />
+
+                    <div className="grid grid-cols-1 xs:grid-cols-2 gap-4 sm:gap-6">
+                      <div className="space-y-1.5">
+                        <label
+                          htmlFor="propertyType"
+                          className="text-[10px] sm:text-xs font-black uppercase text-slate-400"
+                        >
+                          Proprietate *
+                        </label>
+                        <select
+                          id="propertyType"
+                          name="propertyType"
+                          value={formData.propertyType}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 sm:py-4 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none appearance-none"
+                        >
+                          <option value="">Selectați...</option>
+                          {propertyTypes.map((t) => (
+                            <option key={t} value={t}>
+                              {t}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label
+                          htmlFor="interest"
+                          className="text-[10px] sm:text-xs font-black uppercase text-slate-400"
+                        >
+                          Interes *
+                        </label>
+                        <select
+                          id="interest"
+                          name="interest"
+                          value={formData.interest}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 sm:py-4 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none appearance-none"
+                        >
+                          <option value="">Selectați...</option>
+                          {interests.map((i) => (
+                            <option key={i} value={i}>
+                              {i}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
-                    <div className="space-y-2 sm:col-span-2 md:col-span-1">
-                      <label
-                        htmlFor="phone"
-                        className="text-xs font-black uppercase text-slate-400"
-                      >
-                        Telefon *
-                      </label>
-                      <input
-                        id="phone"
-                        name="phone"
-                        type="tel"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        className="w-full px-5 py-4 rounded-xl border border-slate-200 bg-slate-50 outline-none"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label
-                        htmlFor="propertyType"
-                        className="text-xs font-black uppercase text-slate-400"
-                      >
-                        Proprietate *
-                      </label>
-                      <select
-                        id="propertyType"
-                        name="propertyType"
-                        value={formData.propertyType}
-                        onChange={handleChange}
-                        className="w-full px-5 py-4 rounded-xl border border-slate-200 bg-slate-50 outline-none"
-                      >
-                        <option value="">Selectați...</option>
-                        {propertyTypes.map((t) => (
-                          <option key={t} value={t}>
-                            {t}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <label
-                        htmlFor="interest"
-                        className="text-xs font-black uppercase text-slate-400"
-                      >
-                        Interes *
-                      </label>
-                      <select
-                        id="interest"
-                        name="interest"
-                        value={formData.interest}
-                        onChange={handleChange}
-                        className="w-full px-5 py-4 rounded-xl border border-slate-200 bg-slate-50 outline-none"
-                      >
-                        <option value="">Selectați...</option>
-                        {interests.map((i) => (
-                          <option key={i} value={i}>
-                            {i}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="sm:col-span-2 space-y-2">
-                      <label
-                        htmlFor="message"
-                        className="text-xs font-black uppercase text-slate-400"
-                      >
-                        Mesaj (Opțional)
-                      </label>
-                      <textarea
-                        id="message"
-                        name="message"
-                        value={formData.message}
-                        onChange={handleChange}
-                        rows={4}
-                        className="w-full px-5 py-4 rounded-xl border border-slate-200 bg-slate-50 outline-none resize-none"
-                      />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <Button
-                        variant="accent"
-                        size="xl"
-                        className="w-full h-16 rounded-2xl font-black text-lg transition-all hover:scale-[1.01] active:scale-95"
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting ? (
-                          "Se trimite..."
-                        ) : (
-                          <span className="flex items-center gap-3">
-                            TRIMITE SOLICITAREA <Send className="w-5 h-5" />
-                          </span>
-                        )}
-                      </Button>
-                    </div>
+
+                    <Button
+                      variant="accent"
+                      size="xl"
+                      className="w-full h-14 sm:h-16 rounded-xl sm:rounded-2xl font-black text-base sm:text-lg shadow-lg active:scale-95"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        "Se trimite..."
+                      ) : (
+                        <span className="flex items-center gap-2">
+                          TRIMITE <Send className="w-4 h-4" />
+                        </span>
+                      )}
+                    </Button>
                   </form>
                 </div>
               </div>
 
-              {/* Info Column */}
-              <aside className="lg:col-span-4 order-1 lg:order-2 space-y-6">
+              {/* Info Column - Stivuit sub formular pe mobil */}
+              <aside className="lg:col-span-5 xl:col-span-4 order-2 space-y-4 sm:space-y-6">
                 {contactInfo.map((info) => (
                   <div
                     key={info.title}
-                    className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-start gap-4"
+                    className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4"
                   >
-                    <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center shrink-0">
-                      <info.icon
-                        className="w-6 h-6 text-accent"
-                        aria-hidden="true"
-                      />
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+                      <info.icon className="w-5 h-5 sm:w-6 sm:h-6 text-accent" />
                     </div>
-                    <div>
-                      <h3 className="font-display font-bold text-slate-900 mb-1">
+                    <div className="min-w-0">
+                      {" "}
+                      {/* Previne overflow-ul textului lung */}
+                      <h3 className="font-display font-bold text-slate-900 text-sm sm:text-base">
                         {info.title}
                       </h3>
                       {info.details.map((detail, i) => (
                         <p
                           key={i}
-                          className="text-sm text-slate-500 font-medium leading-relaxed"
+                          className="text-xs sm:text-sm text-slate-500 truncate"
                         >
                           {detail}
                         </p>
@@ -334,21 +312,19 @@ export default function Contact() {
             </div>
           </div>
         </section>
-        {/* Localizare - Ierarhie optimizată SEO */}
-        <section className="bg-white py-12 px-4 text-center border-t border-slate-100">
-          <div className="container mx-auto">
-            <h2 className="font-display text-2xl font-black text-slate-900 mb-2 uppercase tracking-tighter">
+
+        {/* Sediu Section - Optimizare Spatieri */}
+        <section className="bg-white py-10 sm:py-16 border-t border-slate-100">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="font-display text-2xl font-black text-slate-900 mb-2 uppercase tracking-tight">
               Localizare Sediu
             </h2>
-            <p className="text-slate-500 font-medium mb-8">
+            <p className="text-slate-500 text-sm mb-8">
               Dumbrăveni Nicolae labis nr 46, Suceava
             </p>
-            <div className="h-[300px] md:h-[450px] bg-slate-100 rounded-3xl flex items-center justify-center relative overflow-hidden">
-              <MapPin
-                className="w-12 h-12 text-primary animate-bounce relative z-10"
-                aria-hidden="true"
-              />
-              <div className="absolute inset-0 bg-slate-900/5" />
+            <div className="h-[250px] sm:h-[400px] bg-slate-100 rounded-2xl sm:rounded-3xl flex items-center justify-center relative">
+              <MapPin className="w-10 h-10 text-primary animate-bounce z-10" />
+              <div className="absolute inset-0 bg-slate-900/5 rounded-2xl sm:rounded-3xl" />
             </div>
           </div>
         </section>
