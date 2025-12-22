@@ -86,16 +86,16 @@ export default function Contact() {
   return (
     <Layout>
       <div className="overflow-x-hidden w-full max-w-[100vw]">
-        {/* Hero Section - Optimizat LCP */}
+        {/* Hero Section - FIX LCP & CLS */}
         <section className="relative min-h-[450px] lg:min-h-[60vh] flex items-center bg-slate-900">
           <div className="absolute inset-0 z-0">
             <img
               src={contactHeroImage}
-              alt="Instalație panouri fotovoltaice comerciale - Gabriel Solar Energy"
+              alt="Instalație panouri fotovoltaice comerciale de Gabriel Solar Energy"
               className="w-full h-full object-cover opacity-60"
-              loading="eager"
-              fetchPriority="high"
-              width="1920"
+              loading="eager" // Obligatoriu pentru LCP
+              fetchPriority="high" // Prioritate maximă de încărcare
+              width="1920" // Fix CLS
               height="1080"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent md:bg-gradient-to-r" />
@@ -117,15 +117,14 @@ export default function Contact() {
           </div>
         </section>
 
-        {/* Form & Info Section - Adaptabilitate Full Responsive */}
+        {/* Form Section - FIX A11y */}
         <section className="py-8 sm:py-16 md:py-24 bg-slate-50">
           <div className="container mx-auto px-3 sm:px-6 max-w-7xl">
             <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6 sm:gap-10">
-              {/* Form Column - Accesibilitate Corectată */}
               <div className="lg:col-span-7 xl:col-span-8 order-1">
                 <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-12 shadow-lg border border-slate-100">
                   <h2 className="font-display text-2xl sm:text-3xl font-bold text-slate-900 mb-6 sm:mb-8">
-                    Solicită Oferta
+                    Solicită Oferta Personalizată
                   </h2>
 
                   <form
@@ -147,17 +146,11 @@ export default function Contact() {
                           value={formData.firstName}
                           onChange={handleChange}
                           className={cn(
-                            "w-full px-4 py-3 sm:py-4 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all",
+                            "w-full px-4 py-3 sm:py-4 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none focus:ring-2 focus:ring-primary/20",
                             errors.firstName && "border-destructive"
                           )}
                           placeholder="Ex: Ion"
                         />
-                        {errors.firstName && (
-                          <p className="text-destructive text-[10px] font-bold mt-1 flex items-center gap-1">
-                            <AlertCircle className="w-3 h-3" />{" "}
-                            {errors.firstName}
-                          </p>
-                        )}
                       </div>
                       <div className="space-y-1.5">
                         <label
@@ -173,7 +166,7 @@ export default function Contact() {
                           value={formData.lastName}
                           onChange={handleChange}
                           className={cn(
-                            "w-full px-4 py-3 sm:py-4 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all",
+                            "w-full px-4 py-3 sm:py-4 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none",
                             errors.lastName && "border-destructive"
                           )}
                           placeholder="Ex: Popescu"
@@ -226,14 +219,14 @@ export default function Contact() {
                           htmlFor="propertyType"
                           className="text-[10px] sm:text-xs font-black uppercase text-slate-400"
                         >
-                          Proprietate *
+                          Tip Proprietate *
                         </label>
                         <select
                           id="propertyType"
                           name="propertyType"
                           value={formData.propertyType}
                           onChange={handleChange}
-                          className="w-full px-4 py-3 sm:py-4 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none appearance-none"
+                          className="w-full px-4 py-3 sm:py-4 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none"
                         >
                           <option value="">Selectați tipul</option>
                           {propertyTypes.map((t) => (
@@ -248,14 +241,14 @@ export default function Contact() {
                           htmlFor="interest"
                           className="text-[10px] sm:text-xs font-black uppercase text-slate-400"
                         >
-                          Interes *
+                          Motiv Contact *
                         </label>
                         <select
                           id="interest"
                           name="interest"
                           value={formData.interest}
                           onChange={handleChange}
-                          className="w-full px-4 py-3 sm:py-4 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none appearance-none"
+                          className="w-full px-4 py-3 sm:py-4 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none"
                         >
                           <option value="">Selectați motivul</option>
                           {interests.map((i) => (
@@ -270,9 +263,9 @@ export default function Contact() {
                     <Button
                       variant="accent"
                       size="xl"
-                      className="w-full h-14 sm:h-16 rounded-xl sm:rounded-2xl font-black text-base sm:text-lg shadow-lg hover:shadow-accent/20 transition-all active:scale-[0.98]"
+                      className="w-full h-14 sm:h-16 rounded-xl sm:rounded-2xl font-black text-base sm:text-lg shadow-lg active:scale-95"
                       disabled={isSubmitting}
-                      aria-label="Trimite solicitarea pentru ofertă solară"
+                      aria-label="Trimite formularul de contact pentru oferta solară"
                     >
                       {isSubmitting ? (
                         "Se trimite..."
@@ -287,7 +280,6 @@ export default function Contact() {
                 </div>
               </div>
 
-              {/* Info Sidebar - Optimizat pentru a nu fi acoperit de widget-uri */}
               <aside className="lg:col-span-5 xl:col-span-4 order-2 space-y-4 sm:space-y-6">
                 {contactInfo.map((info) => (
                   <div
@@ -320,7 +312,7 @@ export default function Contact() {
           </div>
         </section>
 
-        {/* Localizare Sediu - SEO & Accessibility */}
+        {/* Localizare Section - FIX SEO */}
         <section
           className="bg-white py-10 sm:py-16 border-t border-slate-100"
           aria-labelledby="location-title"
@@ -330,7 +322,7 @@ export default function Contact() {
               id="location-title"
               className="font-display text-2xl font-black text-slate-900 mb-2 uppercase tracking-tight"
             >
-              Localizare Sediu Gabriel Solar
+              Sediul Gabriel Solar Energy
             </h2>
             <p className="text-slate-500 text-sm mb-8">
               Dumbrăveni Nicolae labis nr 46, Suceava, România
@@ -347,7 +339,7 @@ export default function Contact() {
                 to="/about"
                 className="text-primary font-bold hover:underline text-sm md:text-base"
               >
-                Află mai multe despre echipa noastră
+                Citește despre misiunea noastră pentru energie verde
               </Link>
             </div>
           </div>
