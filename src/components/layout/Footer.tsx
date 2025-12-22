@@ -41,7 +41,10 @@ const socialLinks = [
 
 export function Footer() {
   return (
-    <footer className="bg-[#1a4925] text-white border-t border-[#1a4925]" role="contentinfo">
+    <footer
+      className="bg-[#1a4925] text-white border-t border-[#1a4925]"
+      role="contentinfo"
+    >
       <div className="container px-4 py-16 mx-auto max-w-7xl">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
           {/* Brand Column */}
@@ -148,10 +151,10 @@ export function Footer() {
               <li className="flex items-center gap-3 text-sm group">
                 <Mail className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors shrink-0" />
                 <a
-                  href="mailto:contact@gabriel-solar-energy.com"
+                  href="mailto:gabrielsolarenergyy@gmail.com"
                   className="text-gray-300 hover:text-white transition-colors truncate"
                 >
-                  contact@gabriel-solar.com
+                  gabrielsolarenergyy@gmail.com
                 </a>
               </li>
             </ul>

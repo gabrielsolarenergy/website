@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   Check,
@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/layout/Layout";
+import { useAuth } from "@/contexts/AuthContext";
 import heroImage from "@/assets/hero-solar.jpg";
 import residentialImage from "@/assets/residential-solar.jpg";
 import commercialImage from "@/assets/commercial-solar.jpg";
@@ -114,7 +115,7 @@ const stats = [
 
 const testimonials = [
   {
-    name: "Mihai Anderson",
+    name: "Mihai Andreiescu",
     role: "Proprietar Casă",
     content:
       "GABRIEL SOLAR ENERGY a făcut ca întregul proces să fie extrem de simplu. Facturile au scăzut cu 85%!",
@@ -128,7 +129,7 @@ const testimonials = [
     rating: 5,
   },
   {
-    name: "David Chen",
+    name: "David Iftime",
     role: "Manager Proprietăți",
     content:
       "Calitatea muncii și suportul continuu au fost excepționale pentru toate cele 5 locații ale noastre.",
@@ -146,16 +147,30 @@ const partners = [
 ];
 
 export default function Home() {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
+  const handleGetOfferClick = () => {
+    if (isAuthenticated) {
+      window.location.href = "http://localhost:8081/dashboard";
+    } else {
+      navigate("/auth?mode=login&returnTo=dashboard");
+    }
+  };
+
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="relative min-h-[600px] lg:min-h-[80vh] flex items-center overflow-hidden">
+      <section className="relative min-h-[600px] lg:min-h-[80vh] flex items-center overflow-hidden bg-slate-900">
         <div className="absolute inset-0 z-0">
           <img
             src={heroImage}
             alt="Instalație Solară Gabriel"
             className="w-full h-full object-cover"
             loading="eager"
+            fetchPriority="high" // Optimizare LCP
+            width="1920" // Previne Layout Shift
+            height="1080"
           />
           <div className="absolute inset-0 bg-black/60 md:bg-transparent md:bg-gradient-to-r md:from-hero md:via-hero/80 md:to-transparent" />
         </div>
@@ -186,16 +201,13 @@ export default function Home() {
               <Button
                 variant="hero"
                 size="xl"
-                asChild
-                className="w-full sm:w-auto h-14 px-8 text-base"
+                onClick={handleGetOfferClick}
+                className="w-full sm:w-auto h-14 px-8 text-base cursor-pointer"
               >
-                <Link
-                  to="/contact"
-                  className="flex items-center justify-center gap-2"
-                >
+                <div className="flex items-center justify-center gap-2">
                   Obține o ofertă
                   <ArrowRight className="w-5 h-5 ml-2" />
-                </Link>
+                </div>
               </Button>
               <Button
                 variant="hero-outline"
@@ -319,7 +331,7 @@ export default function Home() {
         <div className="container-section">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Soluții Adaptate
+              Soluții adaptate
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -334,6 +346,9 @@ export default function Home() {
                     src={system.image}
                     alt={system.type}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy" // Optimizare performanță
+                    width="640"
+                    height="360"
                   />
                 </div>
                 <div className="p-6">
@@ -357,7 +372,7 @@ export default function Home() {
                     ))}
                   </ul>
                   <Button variant="outline" className="w-full" asChild>
-                    <Link to="/systems">Detalii Proiect</Link>
+                    <Link to="/systems">Detalii proiect</Link>
                   </Button>
                 </div>
               </div>

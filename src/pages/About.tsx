@@ -189,22 +189,27 @@ export default function About() {
               </h2>
               <div className="space-y-6 text-slate-600 text-lg leading-relaxed font-medium">
                 <p>
-                  GABRIEL SOLAR ENERGY a fost fondată în 2010 de către Michael
-                  Thompson, un fost executiv în industria energiei care a
-                  prevăzut potențialul imens al energiei solare de a transforma
-                  modul în care generăm și consumăm electricitatea.
+                  GabrielSolarEnergy a fost înființată în anul 2023 de Vezeteu
+                  Petru Gabriel, un pasionat al energiei verzi și al soluțiilor
+                  sustenabile pentru viitor. Dorința de a contribui activ la
+                  protejarea mediului și la reducerea costurilor energetice a
+                  stat la baza creării companiei.
                 </p>
                 <p>
-                  Ceea ce a început ca o echipă mică de trei ingineri pasionați
-                  s-a transformat în una dintre cele mai de încredere companii
-                  de instalații solare din regiune, cu peste 50 de angajați și
-                  peste 500 de proiecte de succes.
+                  Ne dedicăm furnizării de soluții moderne și eficiente în
+                  domeniul energiei solare, adaptate atât pentru clienți
+                  rezidențiali, cât și pentru cei comerciali. Punem accent pe
+                  calitate, profesionalism și tehnologii de ultimă generație,
+                  oferind consultanță personalizată, instalare corectă și suport
+                  pe termen lung.
                 </p>
                 <p>
-                  Astăzi, continuăm să conducem tranziția către energia
-                  regenerabilă, ajutând proprietarii de case, afacerile și
-                  facilitățile industriale să își reducă amprenta de carbon în
-                  timp ce economisesc bani.
+                  Misiunea noastră este să transformăm energia solară într-o
+                  alegere accesibilă și sigură pentru oricine își dorește
+                  independență energetică și un impact pozitiv asupra mediului.
+                  La GabrielSolarEnergy, credem că viitorul este verde, iar
+                  fiecare proiect reprezintă un pas înainte spre un mâine mai
+                  curat și mai eficient.
                 </p>
               </div>
             </div>
@@ -274,7 +279,7 @@ export default function About() {
         </div>
       </section>
 
-      {/* Team Section */}
+      {/* Team Section
       <section id="team" className="section-padding bg-background px-4">
         <div className="container-section">
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -322,7 +327,7 @@ export default function About() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Certifications - Carousel-like look */}
       <section className="py-20 bg-primary px-4">

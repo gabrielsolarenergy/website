@@ -74,6 +74,7 @@ const AppContent = () => {
     "/projects",
     "/about",
     "/blog",
+    "/contact",
   ].includes(location.pathname);
 
   return (

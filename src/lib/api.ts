@@ -280,40 +280,43 @@ export const adminAPI = {
     ),
 };
 
-// ==================== CHAT WEBSOCKET ====================
 export const createChatConnection = (
   roomUserId: string,
   token: string,
   onMessage: (msg: any) => void,
-  onError: (error: any) => void,
-  onClose: () => void
+  onError?: (error: any) => void,
+  onClose?: () => void
 ) => {
-  const wsUrl = `${API_URL.replace(
-    "http",
-    "ws"
-  )}/chat/ws/${roomUserId}?token=${token}`;
+  const wsBaseUrl = API_URL.replace("https://", "wss://").replace(
+    "http://",
+    "ws://"
+  );
+  // Calea trebuie să fie /chat/ws/ conform ruterului curățat în backend
+  const wsUrl = `${wsBaseUrl}/chat/ws/${roomUserId}?token=${encodeURIComponent(
+    token
+  )}`;
+
   const ws = new WebSocket(wsUrl);
 
-  ws.onopen = () => console.log("Chat connected");
   ws.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data);
       onMessage(data);
     } catch (e) {
-      console.error("Failed to parse message", e);
+      console.error("Parse error", e);
     }
   };
-  ws.onerror = onError;
-  ws.onclose = onClose;
+
+  ws.onerror = (e) => onError?.(e);
+  ws.onclose = () => onClose?.();
 
   return {
-    send: (text: string) => {
+    send: (payload: any) => {
       if (ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({ text }));
+        ws.send(JSON.stringify(payload));
       }
     },
     close: () => ws.close(),
-    getState: () => ws.readyState,
   };
 };
 

@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Check,
   ArrowRight,
@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/layout/Layout";
 import { useHeaderHeight } from "@/hooks/use-header-height";
+import { useAuth } from "@/contexts/AuthContext";
 import residentialImage from "@/assets/residential-solar.jpg";
 
 const systems = [
@@ -175,11 +176,11 @@ export default function Systems() {
   const [filter, setFilter] = useState<string>("Toate");
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const headerHeight = useHeaderHeight();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
-  // REZOLVARE EROARE: Definirea referinței
   const filterSectionRef = useRef<HTMLDivElement>(null);
 
-  // REZOLVARE EROARE: Definirea funcției de schimbare a filtrului
   const handleFilterChange = (type: string) => {
     setFilter(type);
     if (filterSectionRef.current) {
@@ -190,12 +191,20 @@ export default function Systems() {
     }
   };
 
+  const handleOfferRedirect = () => {
+    if (isAuthenticated) {
+      window.location.href = "http://localhost:8081/dashboard";
+    } else {
+      navigate("/auth?mode=login&returnTo=dashboard");
+    }
+  };
+
   const filteredSystems =
     filter === "Toate" ? systems : systems.filter((s) => s.type === filter);
 
   return (
     <Layout>
-      {/* Hero Section - Identică cu Home ca dimensiune și stil */}
+      {/* Hero Section */}
       <section className="relative min-h-[600px] lg:min-h-[80vh] flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img
@@ -232,7 +241,7 @@ export default function Systems() {
         </div>
       </section>
 
-      {/* Filter Tabs - Sticky sub navbar */}
+      {/* Filter Tabs */}
       <section
         ref={filterSectionRef}
         className="sticky z-[45] w-full border-b border-border bg-background/95 backdrop-blur-sm"
@@ -263,7 +272,7 @@ export default function Systems() {
       </section>
 
       {/* Systems Grid */}
-      <section className="section-padding bg-slate-50/50">
+      {/* <section className="section-padding bg-slate-50/50">
         <div className="container-section px-4">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-y-16 gap-x-8">
             {filteredSystems.map((system, index) => {
@@ -353,12 +362,12 @@ export default function Systems() {
 
                     <Button
                       variant={system.popular ? "accent" : "outline"}
-                      className="w-full h-14 rounded-xl font-bold text-lg"
-                      asChild
+                      className="w-full h-14 rounded-xl font-bold text-lg cursor-pointer"
+                      onClick={handleOfferRedirect}
                     >
-                      <Link to="/contact">
-                        Cere Ofertă <ArrowRight className="w-5 h-5 ml-2" />
-                      </Link>
+                      <div className="flex items-center justify-center gap-2">
+                        Cere ofertă <ArrowRight className="w-5 h-5 ml-2" />
+                      </div>
                     </Button>
                   </div>
                 </div>
@@ -366,9 +375,9 @@ export default function Systems() {
             })}
           </div>
         </div>
-      </section>
+      </section> */}
 
-      {/* FAQ & CTA Sections (Rămân neschimbate) */}
+      {/* FAQ Section */}
       <section className="section-padding bg-white border-t">
         <div className="container-section max-w-4xl mx-auto px-4">
           <h2 className="text-center font-display text-3xl font-bold mb-12">

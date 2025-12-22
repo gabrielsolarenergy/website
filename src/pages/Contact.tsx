@@ -20,25 +20,22 @@ import contactHeroImage from "@/assets/commercial-solar.jpg";
 const contactInfo = [
   {
     icon: MapPin,
-    title: "Vizitați Biroul Nostru",
-    details: ["Bd. Energiei nr. 123, Etaj 4", "București, Sector 1, 010101"],
+    title: "Vizitați biroul nostru",
+    details: ["Dumbrăveni Nicolae labis nr 46", "Suceava, România"],
   },
   {
     icon: Phone,
     title: "Sunați-ne",
-    details: ["+40 722 000 000", "+40 733 000 000"],
+    details: ["+40 741 811 364"],
   },
   {
     icon: Mail,
-    title: "Trimiteți Email",
-    details: [
-      "contact@gabriel-solar-energy.com",
-      "suport@gabriel-solar-energy.com",
-    ],
+    title: "Trimiteți email",
+    details: ["gabrielsolarenergyy@gmail.com"],
   },
   {
     icon: Clock,
-    title: "Program de Lucru",
+    title: "Program de lucru",
     details: ["Luni - Vineri: 08:00 - 18:00", "Sâmbătă: 09:00 - 14:00"],
   },
 ];

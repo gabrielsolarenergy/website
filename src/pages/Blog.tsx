@@ -225,7 +225,7 @@ export default function Blog() {
                     <Link
                       to={`/blog/${featuredArticle.slug || featuredArticle.id}`}
                     >
-                      Citește Articolul <ArrowRight className="ml-2 w-5 h-5" />
+                      Citește articolul <ArrowRight className="ml-2 w-5 h-5" />
                     </Link>
                   </Button>
                 </div>
