@@ -66,6 +66,15 @@ const AppContent = () => {
     "/reset-password",
   ].includes(location.pathname);
   const isAdminPath = location.pathname.startsWith("/admin");
+  const hasHeroPath = [
+    "/",
+    "/systems",
+    "/services",
+    "/financing",
+    "/projects",
+    "/about",
+    "/blog",
+  ].includes(location.pathname);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -75,9 +84,8 @@ const AppContent = () => {
       <main
         className={cn(
           "flex-grow",
-          // Adăugăm padding-top pentru a compensa Header-ul fixed (h-20 sau h-28)
-          // Paginile de Auth pot ignora acest padding dacă au design full-screen
-          !isAuthPath ? "pt-20 md:pt-28" : ""
+          // Punem padding DOAR dacă NU este o pagină cu Hero și NU este pagina de Login
+          !hasHeroPath && !isAuthPath ? "pt-20 md:pt-28" : ""
         )}
       >
         <Routes>
