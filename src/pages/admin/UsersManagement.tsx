@@ -196,15 +196,6 @@ const UsersManagement = () => {
           <h1 className="text-3xl font-black text-slate-900 tracking-tighter uppercase">
             Gestionare <span className="text-[#1a4925]">Utilizatori</span>
           </h1>
-          <Button
-            onClick={() => {
-              setSelectedUser(null);
-              setIsDialogOpen(true);
-            }}
-            className="bg-[#1a4925] rounded-xl font-bold"
-          >
-            <Plus className="w-4 h-4 mr-2" /> Adaugă Utilizator
-          </Button>
         </div>
 
         <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm relative">

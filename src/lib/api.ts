@@ -195,6 +195,32 @@ export const serviceAPI = {
 
 // ==================== ADMIN API ====================
 export const adminAPI = {
+  // --- Leads Management ---
+
+  createLead: (data) =>
+    apiRequest(
+      "/admin/leads",
+      { method: "POST", body: JSON.stringify(data) },
+      true
+    ),
+
+  updateLead: (id, data) =>
+    apiRequest(
+      `/admin/leads/${id}`,
+      { method: "PATCH", body: JSON.stringify(data) },
+      true
+    ),
+
+  updateLeadStatus: (leadId: string, status: string) =>
+    apiRequest(
+      `/admin/leads/${leadId}/status?status=${encodeURIComponent(status)}`,
+      { method: "PATCH" },
+      true
+    ),
+
+  deleteLead: (leadId: string) =>
+    apiRequest(`/admin/leads/${leadId}`, { method: "DELETE" }, true),
+
   getBlogPosts: () => apiRequest<any[]>("/admin/blog", { method: "GET" }, true),
 
   createBlogPost: (data: any) =>
@@ -288,14 +314,23 @@ export const adminAPI = {
       true
     );
   },
-
-  // --- Service Requests ---
-  getAllServiceRequests: (service_type?: string, status?: string) => {
+  // --- Service Requests Actualizat ---
+  getAllServiceRequests: (
+    service_type?: string,
+    status?: string,
+    page: number = 1,
+    size: number = 5
+  ) => {
     const query = new URLSearchParams();
     if (service_type && service_type !== "all")
       query.append("service_type", service_type);
     if (status && status !== "all") query.append("status", status);
-    return apiRequest<any[]>(
+
+    // Adăugăm parametrii de paginare
+    query.append("page", page.toString());
+    query.append("size", size.toString());
+
+    return apiRequest<any>( // Schimbăm din any[] în any deoarece returnăm un obiect cu metadate
       `/admin/all?${query.toString()}`,
       { method: "GET" },
       true

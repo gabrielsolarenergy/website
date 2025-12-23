@@ -7,11 +7,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
-  User,
   Mail,
   Phone,
-  Info,
-  ExternalLink,
   Badge,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -93,33 +90,44 @@ export const AdminCalendarManager = () => {
   const fetchEvents = async () => {
     setIsLoading(true);
     try {
-      // Preluăm toate cererile acceptate din baza de date
+      // Modificare crucială: API-ul returnează acum { items, total_pages, ... }
+      // Cerem o limită mai mare (ex: 100) pentru a vedea tot calendarul
       const { data, error } = await adminAPI.getAllServiceRequests(
         undefined,
-        "accepted"
+        "accepted",
+        1,
+        100
       );
+
       if (error) throw new Error(error);
 
-      const formatted = (data || []).map((req: any) => {
+      // Extragem items din răspunsul paginat
+      const requests = data?.items || [];
+
+      const formatted = requests.map((req: any) => {
+        // Combinăm data cu ora
         const d = new Date(req.preferred_date);
-        const [h, m] = req.preferred_time.split(":").map(Number);
-        d.setHours(h, m);
+        const [h, m] = (req.preferred_time || "09:00").split(":").map(Number);
+        d.setHours(h || 9, m || 0);
+
         return {
           id: req.id,
           title: req.user
             ? `${req.user.first_name} ${req.user.last_name}`
-            : req.title || "Client Extern",
+            : req.full_name || req.title || "Client Extern",
           description: req.description || "Fără descriere",
           start: d,
           location: req.location || "Nespecificată",
           email: req.user?.email || req.email || "Fără email",
-          phone: req.phone || "Fără telefon",
+          phone: req.user?.phone_number || req.phone || "Fără telefon",
           color: "primary",
-          type: req.type,
+          type: req.type || "Intervenție",
         };
       });
+
       setEvents(formatted);
     } catch (err) {
+      console.error("Fetch events error:", err);
       toast({
         title: "Eroare",
         description: "Nu s-au putut încărca datele din server.",
@@ -140,7 +148,6 @@ export const AdminCalendarManager = () => {
     setIsSaving(true);
 
     try {
-      // Apelăm API-ul pentru a salva permanent programarea
       const { error } = await adminAPI.createCalendarEvent({
         title: formData.title,
         description: formData.description,
@@ -154,15 +161,13 @@ export const AdminCalendarManager = () => {
 
       if (error) throw new Error(error);
 
-      // Reîncărcăm datele de la server pentru a include noul eveniment salvat
       await fetchEvents();
 
       toast({
         title: "Succes",
-        description: "Programarea a fost salvată permanent în baza de date.",
+        description: "Programarea a fost salvată permanent.",
       });
       setIsEditorOpen(false);
-      // Resetare formular
       setFormData({
         title: "",
         description: "",
@@ -189,6 +194,7 @@ export const AdminCalendarManager = () => {
     const year = date.getFullYear();
     const month = date.getMonth();
     const firstDay = new Date(year, month, 1);
+    // Calcul pentru a începe săptămâna de Luni (0=Luni...6=Duminică)
     const startDay = (firstDay.getDay() + 6) % 7;
     const days = [];
     for (let i = 0; i < startDay; i++) days.push(null);
@@ -299,7 +305,7 @@ export const AdminCalendarManager = () => {
                               className={cn(
                                 "px-2 py-1.5 rounded-lg text-[10px] font-bold text-white truncate cursor-help shadow-sm",
                                 eventColors.find((c) => c.value === event.color)
-                                  ?.class || "bg-primary"
+                                  ?.class || "bg-[#1a4925]"
                               )}
                             >
                               {event.start.toLocaleTimeString([], {
@@ -320,29 +326,31 @@ export const AdminCalendarManager = () => {
                             </div>
                             <div className="p-4 space-y-3 text-xs">
                               <div className="grid grid-cols-2 gap-3">
-                                <div className="flex items-center gap-2 font-bold">
+                                <div className="flex items-center gap-2 font-bold text-slate-700">
                                   <Phone className="w-3 h-3 text-[#1a4925]" />{" "}
                                   {event.phone}
                                 </div>
-                                <div className="flex items-center gap-2 font-bold">
-                                  <Clock className="w-3 h-3 text-[#1a4925]" />{" "}
+                                <div className="flex items-center gap-2 font-bold text-slate-700">
+                                  <Clock className="w-3 h-3 text-[#1a4925]" />
                                   {event.start.toLocaleTimeString([], {
                                     hour: "2-digit",
                                     minute: "2-digit",
                                   })}
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2 font-bold truncate">
+                              <div className="flex items-center gap-2 font-bold text-slate-700">
                                 <Mail className="w-3 h-3 text-[#1a4925]" />{" "}
                                 {event.email}
                               </div>
-                              <div className="flex items-center gap-2 font-bold">
+                              <div className="flex items-center gap-2 font-bold text-slate-700">
                                 <MapPin className="w-3 h-3 text-[#1a4925]" />{" "}
                                 {event.location}
                               </div>
-                              <div className="mt-2 pt-2 border-t border-slate-50 italic text-slate-500">
-                                {event.description}
-                              </div>
+                              {event.description && (
+                                <div className="mt-2 pt-2 border-t border-slate-50 italic text-slate-500">
+                                  {event.description}
+                                </div>
+                              )}
                             </div>
                           </TooltipContent>
                         </Tooltip>
@@ -366,7 +374,6 @@ export const AdminCalendarManager = () => {
               {todayEvents.length} Programări
             </Badge>
           </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {todayEvents.length > 0 ? (
               todayEvents.map((event) => (
@@ -385,7 +392,7 @@ export const AdminCalendarManager = () => {
                         {event.phone}
                       </div>
                       <div className="flex items-center gap-2">
-                        <Clock className="w-3.5 h-3.5 text-[#1a4925]" />{" "}
+                        <Clock className="w-3.5 h-3.5 text-[#1a4925]" />
                         {event.start.toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -411,7 +418,7 @@ export const AdminCalendarManager = () => {
           </div>
         </div>
 
-        {/* Dialog Formular Programare Manuală */}
+        {/* Dialog Formular */}
         <Dialog open={isEditorOpen} onOpenChange={setIsEditorOpen}>
           <DialogContent className="rounded-[2rem] max-w-md p-8">
             <DialogHeader>
@@ -526,7 +533,7 @@ export const AdminCalendarManager = () => {
                   <Loader2 className="animate-spin mr-2 w-4 h-4" />
                 ) : (
                   <Plus className="mr-2 w-4 h-4" />
-                )}{" "}
+                )}
                 Salvează în DB
               </Button>
             </DialogFooter>

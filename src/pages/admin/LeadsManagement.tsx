@@ -412,13 +412,6 @@ const LeadsManagement = () => {
                               <Eye className="w-4 h-4 mr-2 text-slate-400" />{" "}
                               Detalii Lead
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => handleEdit(lead)}
-                              className="rounded-xl cursor-pointer"
-                            >
-                              <Edit className="w-4 h-4 mr-2 text-slate-400" />{" "}
-                              Editează Date
-                            </DropdownMenuItem>
 
                             <DropdownMenuSeparator className="my-2 bg-slate-50" />
                             <p className="px-2 py-1 text-[9px] font-black text-slate-400 uppercase tracking-widest">
