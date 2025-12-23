@@ -14,7 +14,7 @@ import CustomPagination from "@/components/common/CustomPagination";
 import { Link } from "react-router-dom";
 import { useHeaderHeight } from "@/hooks/use-header-height";
 import { useAutofocus } from "@/hooks/use-autofocus";
-import { solarAPI } from "@/lib/api"; // Importă API-ul
+import { solarAPI } from "@/lib/api";
 
 // Imagine pentru fundal Hero
 import blogHeroImage from "@/assets/commercial-solar.jpg";
@@ -36,17 +36,16 @@ export default function Blog() {
   const [selectedCategory, setSelectedCategory] = useState("Toate postările");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const articlesPerPage = 6; // Am mărit numărul per pagină pentru datele de pe server
+  const articlesPerPage = 6;
 
   const headerHeight = useHeaderHeight();
   const filterSectionRef = useAutofocus<HTMLElement>([selectedCategory]);
 
-  // --- FETCH DATE DE PE SERVER ---
+  // --- FETCH DATE ---
   useEffect(() => {
     const fetchArticles = async () => {
       setIsLoading(true);
       try {
-        // Presupunem că API-ul acceptă query params pentru filtrare și căutare
         const { data, error } = await solarAPI.getBlogPosts();
         if (error) throw new Error(error);
         setArticles(data || []);
@@ -56,11 +55,22 @@ export default function Blog() {
         setIsLoading(false);
       }
     };
-
     fetchArticles();
   }, []);
 
-  // --- LOGICĂ FILTRARE ȘI PAGINARE ---
+  // --- HELPER IMAGINE (Rezolvă problema afișării) ---
+  const getArticleImage = (article: any) => {
+    return article.featured_image || article.image_url || article.image;
+  };
+
+  const handleImageError = (
+    e: React.SyntheticEvent<HTMLImageElement, Event>
+  ) => {
+    e.currentTarget.src =
+      "https://images.unsplash.com/photo-1509391366360-feaffa64829b?q=80&w=800&auto=format&fit=crop";
+  };
+
+  // --- FILTRARE ---
   const filteredArticles = articles.filter((article) => {
     const matchesCategory =
       selectedCategory === "Toate postările" ||
@@ -73,107 +83,76 @@ export default function Blog() {
   });
 
   const totalPages = Math.ceil(filteredArticles.length / articlesPerPage) || 1;
-  const indexOfLastArticle = currentPage * articlesPerPage;
-  const indexOfFirstArticle = indexOfLastArticle - articlesPerPage;
   const currentArticles = filteredArticles.slice(
-    indexOfFirstArticle,
-    indexOfLastArticle
+    (currentPage - 1) * articlesPerPage,
+    currentPage * articlesPerPage
   );
 
-  // Articolul recomandat (Featured) - cel mai recent din "Toate postările"
   const featuredArticle = articles.length > 0 ? articles[0] : null;
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     const scrollTarget = filterSectionRef.current
-      ? filterSectionRef.current.offsetTop - headerHeight
+      ? filterSectionRef.current.offsetTop - (headerHeight + 20)
       : 500;
     window.scrollTo({ top: scrollTarget, behavior: "smooth" });
-  };
-
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category);
-    setCurrentPage(1);
-  };
-
-  const handleImageError = (
-    e: React.SyntheticEvent<HTMLImageElement, Event>
-  ) => {
-    e.currentTarget.src =
-      "https://images.unsplash.com/photo-1509391366360-feaffa64829b?q=80&w=800&auto=format&fit=crop";
   };
 
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="relative min-h-[600px] lg:min-h-[80vh] flex items-center overflow-hidden font-sans">
+      <section className="relative min-h-[500px] lg:min-h-[70vh] flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img
             src={blogHeroImage}
-            alt="Blog Gabriel Solar"
+            alt="Blog"
             className="w-full h-full object-cover"
             loading="eager"
           />
-          <div className="absolute inset-0 bg-black/60 md:bg-transparent md:bg-gradient-to-r md:from-hero md:via-hero/80 md:to-transparent" />
+          <div className="absolute inset-0 bg-black/60 md:bg-gradient-to-r md:from-black/80 md:to-transparent" />
         </div>
 
-        <div className="container-section relative z-10 w-full pt-28 pb-12 md:py-32 px-4 sm:px-0">
-          <div className="max-w-4xl mx-auto md:mx-0">
-            <div className="badge-eco mb-6 inline-flex items-center animate-fade-up">
-              <Star className="w-4 h-4 mr-2 text-accent shrink-0" />
-              <span className="text-white text-xs md:text-sm font-medium whitespace-nowrap">
-                Actualizat săptămânal cu noutăți solar
-              </span>
-            </div>
-
-            <h1 className="font-display font-bold text-white mb-6 animate-fade-up animation-delay-100 leading-[1.1] tracking-tight text-[2.5rem] sm:text-[3.5rem] lg:text-[5rem]">
-              <span className="block">Alimentează-ți viitorul:</span>
-              <span className="text-gradient-diagonal block md:inline">
-                {" "}
-                Idei și noutăți.
-              </span>
+        <div className="container-section relative z-10 w-full pt-20 px-4">
+          <div className="max-w-4xl">
+            <h1 className="font-display font-bold text-white mb-6 leading-tight text-4xl md:text-6xl lg:text-7xl">
+              Alimentează-ți viitorul: <br />
+              <span className="text-accent">Idei și noutăți.</span>
             </h1>
-
-            <p className="text-white/90 mb-10 max-w-xl leading-relaxed animate-fade-up animation-delay-200 text-base md:text-xl md:text-white/80 font-medium">
-              Descoperă ultimele tendințe în tehnologia fotovoltaică, ghiduri de
-              economisire și analize detaliate.
-            </p>
-
-            <div className="max-w-md animate-fade-up animation-delay-300">
-              <div className="relative group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50 group-focus-within:text-accent transition-colors" />
-                <input
-                  type="text"
-                  placeholder="Caută în articole..."
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="w-full pl-12 pr-4 py-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-accent backdrop-blur-md transition-all"
-                />
-              </div>
+            <div className="max-w-md relative group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50 group-focus-within:text-accent transition-colors" />
+              <input
+                type="text"
+                placeholder="Caută în articole..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full pl-12 pr-4 py-4 rounded-xl bg-white/10 border border-white/20 text-white backdrop-blur-md focus:ring-2 focus:ring-accent outline-none"
+              />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Category Filters */}
+      {/* Category Filters (RESPONSIVE: Scroll orizontal pe mobil) */}
       <section
         ref={filterSectionRef}
         className="py-4 bg-background border-b border-border sticky z-40 shadow-sm"
         style={{ top: `${headerHeight}px` }}
-        tabIndex={-1}
       >
         <div className="container-section px-4">
-          <div className="flex flex-wrap gap-2 justify-center">
+          <div className="flex flex-nowrap md:flex-wrap gap-2 overflow-x-auto pb-2 md:pb-0 md:justify-center no-scrollbar">
             {categories.map((category) => (
               <button
                 key={category}
-                onClick={() => handleCategoryChange(category)}
-                className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
+                onClick={() => {
+                  setSelectedCategory(category);
+                  setCurrentPage(1);
+                }}
+                className={`px-5 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
                   selectedCategory === category
-                    ? "bg-primary text-primary-foreground shadow-lg"
+                    ? "bg-primary text-primary-foreground shadow-md"
                     : "bg-muted text-muted-foreground hover:bg-muted/80"
                 }`}
               >
@@ -184,48 +163,41 @@ export default function Blog() {
         </div>
       </section>
 
-      {/* Featured Article Section */}
+      {/* Featured Article */}
       {!isLoading &&
         !searchQuery &&
         selectedCategory === "Toate postările" &&
         currentPage === 1 &&
         featuredArticle && (
-          <section className="section-padding bg-background pb-0">
+          <section className="py-12 bg-background">
             <div className="container-section px-4">
-              <div className="flex items-center gap-2 mb-8 text-primary font-black uppercase tracking-tighter text-sm">
-                <Star className="w-5 h-5 fill-accent text-accent" />{" "}
-                Recomandarea Săptămânii
+              <div className="flex items-center gap-2 mb-6 text-primary font-bold uppercase text-xs tracking-widest">
+                <Star className="w-4 h-4 fill-accent text-accent" /> Recomandare
               </div>
-              <div className="grid lg:grid-cols-2 gap-0 bg-white rounded-[2.5rem] overflow-hidden border border-slate-100 shadow-2xl">
-                <div className="relative aspect-video lg:aspect-auto min-h-[400px]">
+              <div className="grid lg:grid-cols-2 bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-xl">
+                <div className="relative aspect-video lg:aspect-auto min-h-[300px]">
                   <img
-                    src={featuredArticle.image_url || featuredArticle.image}
+                    src={getArticleImage(featuredArticle)}
                     alt={featuredArticle.title}
                     onError={handleImageError}
                     className="absolute inset-0 w-full h-full object-cover"
                   />
-                  <div className="absolute top-8 left-8">
-                    <span className="bg-accent text-accent-foreground px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
-                      {featuredArticle.category}
-                    </span>
-                  </div>
                 </div>
-                <div className="p-10 lg:p-16 flex flex-col justify-center bg-slate-50/50">
-                  <h2 className="font-display text-3xl md:text-4xl font-bold mb-6 text-slate-900 leading-tight">
+                <div className="p-8 md:p-12 flex flex-col justify-center">
+                  <span className="text-accent font-bold text-xs uppercase mb-3">
+                    {featuredArticle.category}
+                  </span>
+                  <h2 className="text-2xl md:text-4xl font-bold mb-4">
                     {featuredArticle.title}
                   </h2>
-                  <p className="text-slate-500 mb-10 text-lg leading-relaxed font-medium">
+                  <p className="text-muted-foreground mb-8 line-clamp-3">
                     {featuredArticle.excerpt}
                   </p>
-                  <Button
-                    variant="hero"
-                    className="w-fit h-14 px-8 text-lg shadow-xl"
-                    asChild
-                  >
+                  <Button variant="hero" className="w-fit" asChild>
                     <Link
                       to={`/blog/${featuredArticle.slug || featuredArticle.id}`}
                     >
-                      Citește articolul <ArrowRight className="ml-2 w-5 h-5" />
+                      Citește articolul <ArrowRight className="ml-2 w-4 h-4" />
                     </Link>
                   </Button>
                 </div>
@@ -234,104 +206,79 @@ export default function Blog() {
           </section>
         )}
 
-      {/* Latest Articles Grid */}
-      <section className="section-padding bg-background min-h-[400px]">
+      {/* Articles Grid (RESPONSIVE: 1 coloană mobil, 2 tableta, 3 desktop) */}
+      <section className="py-12 bg-background">
         <div className="container-section px-4">
-          <div className="flex items-center justify-between mb-12">
-            <h2 className="font-display text-3xl md:text-4xl font-black text-slate-900 tracking-tighter">
-              {searchQuery
-                ? `REZULTATE PENTRU: ${searchQuery.toUpperCase()}`
-                : "ULTIMELE ARTICOLE"}
-            </h2>
-          </div>
+          <h2 className="text-2xl font-bold mb-8 uppercase tracking-tighter">
+            {searchQuery
+              ? `Rezultate pentru: ${searchQuery}`
+              : "Ultimele articole"}
+          </h2>
 
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-20">
-              <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
-              <p className="text-slate-500 font-medium">
-                Se încarcă articolele...
-              </p>
+            <div className="flex flex-col items-center py-20">
+              <Loader2 className="w-10 h-10 text-primary animate-spin" />
             </div>
           ) : currentArticles.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {currentArticles.map((article, index) => (
                 <article
                   key={article.id}
-                  className="group flex flex-col bg-white rounded-3xl border border-slate-100 overflow-hidden hover:shadow-2xl transition-all duration-500 animate-fade-up"
-                  style={{ animationDelay: `${index * 100}ms` }}
+                  className="group bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-lg transition-all flex flex-col"
                 >
                   <div className="aspect-[16/10] overflow-hidden relative">
                     <img
-                      src={article.image_url || article.image}
+                      src={getArticleImage(article)}
                       alt={article.title}
                       onError={handleImageError}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    <div className="absolute top-4 left-4">
-                      <span className="bg-white/95 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black text-primary shadow-sm uppercase tracking-tighter">
-                        {article.category}
-                      </span>
-                    </div>
                   </div>
-                  <div className="p-8 flex flex-col flex-1">
-                    <div className="flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">
-                      <span className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-accent" />
+                  <div className="p-6 flex flex-col flex-1">
+                    <div className="flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase mb-3">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />{" "}
                         {new Date(
                           article.created_at || article.date
                         ).toLocaleDateString("ro-RO")}
                       </span>
-                      <span className="flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5 text-accent" />
-                        {article.read_time || article.readTime || "5 min"}
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />{" "}
+                        {article.read_time || "5 min"}
                       </span>
                     </div>
-                    <h3 className="font-display text-xl font-bold mb-4 group-hover:text-primary transition-colors leading-snug text-slate-900">
+                    <h3 className="text-lg font-bold mb-3 group-hover:text-primary transition-colors line-clamp-2">
                       {article.title}
                     </h3>
-                    <p className="text-slate-500 text-sm line-clamp-3 mb-8 flex-1 font-medium leading-relaxed">
+                    <p className="text-sm text-muted-foreground mb-6 line-clamp-2 flex-1">
                       {article.excerpt}
                     </p>
                     <Link
                       to={`/blog/${article.slug || article.id}`}
-                      className="text-primary font-black text-xs flex items-center gap-2 group/link uppercase tracking-widest border-t pt-6"
+                      className="text-primary font-bold text-xs flex items-center gap-1 uppercase tracking-wider mt-auto border-t pt-4"
                     >
-                      Citește mai mult
-                      <ChevronRight className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
+                      Citește mai mult <ChevronRight className="w-4 h-4" />
                     </Link>
                   </div>
                 </article>
               ))}
             </div>
           ) : (
-            <div className="text-center py-24 bg-slate-50 rounded-[3rem] border-2 border-dashed border-slate-200">
-              <Search className="w-16 h-16 text-slate-200 mx-auto mb-6" />
-              <p className="text-2xl font-bold text-slate-400 mb-4">
-                Nu am găsit articole care să se potrivească.
+            <div className="text-center py-20 bg-slate-50 rounded-2xl border-2 border-dashed">
+              <p className="text-slate-500">
+                Nu am găsit articole care să corespundă criteriilor.
               </p>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSelectedCategory("Toate postările");
-                  setSearchQuery("");
-                }}
-                className="rounded-xl font-bold"
-              >
-                Resetează toate filtrele
-              </Button>
             </div>
           )}
 
-          {!isLoading && totalPages > 0 && (
-            <div className="mt-20">
+          {/* Pagination */}
+          {!isLoading && totalPages > 1 && (
+            <div className="mt-16">
               <CustomPagination
                 currentPage={currentPage}
                 totalPages={totalPages}
                 onPageChange={handlePageChange}
               />
-              <p className="text-center text-xs text-slate-400 mt-4 font-bold uppercase tracking-widest">
-                Pagina {currentPage} din {totalPages}
-              </p>
             </div>
           )}
         </div>

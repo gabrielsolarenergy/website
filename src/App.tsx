@@ -2,7 +2,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useLocation,
+  Navigate,
+} from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute, GuestRoute } from "@/components/guards/ProtectedRoute";
 import { cn } from "@/lib/utils";
@@ -51,12 +57,11 @@ const queryClient = new QueryClient();
 
 /**
  * AppContent gestionează logica vizuală globală.
- * Acesta injectează Header-ul și Widget-urile în funcție de ruta activă.
  */
 const AppContent = () => {
   const location = useLocation();
 
-  // Definim rutele unde NU vrem să afișăm Header-ul (Login, Register etc.)
+  // Rutele unde ascundem complet Header-ul (Auth flow)
   const isAuthPath = [
     "/login",
     "/register",
@@ -68,7 +73,7 @@ const AppContent = () => {
   // Verificăm dacă suntem în panoul de admin
   const isAdminPath = location.pathname.startsWith("/admin");
 
-  // Definim paginile care au Hero Section (unde nu punem padding de sus pentru header)
+  // Pagini care au Hero Section (unde imaginea de fundal intră sub header)
   const hasHeroPath = [
     "/",
     "/systems",
@@ -82,16 +87,14 @@ const AppContent = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* MODIFICARE: Header-ul se randează doar dacă NU suntem pe o pagină de Auth.
-          Dacă vrei să îl ascunzi și în Admin, poți pune: {!isAuthPath && !isAdminPath && <Header />}
-      */}
+      {/* Header-ul este vizibil peste tot, mai puțin pe rutele de Login/Register */}
       {!isAuthPath && <Header />}
 
       <main
         className={cn(
           "flex-grow",
-          // Punem padding pentru a nu intra conținutul sub Header-ul fix
-          // DOAR dacă NU avem Hero (care e full screen) și NU suntem pe Auth (unde nu e Header)
+          // Adăugăm padding-ul pt-20 (pentru a evita suprapunerea sub Header-ul fix)
+          // dacă NU suntem pe o pagină cu Hero și NU suntem pe o rută de Auth
           !hasHeroPath && !isAuthPath ? "pt-20 md:pt-28" : ""
         )}
       >
@@ -108,7 +111,7 @@ const AppContent = () => {
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/contact" element={<Contact />} />
 
-          {/* --- RUTE AUTENTIFICARE (GuestOnly) --- */}
+          {/* --- RUTE AUTENTIFICARE --- */}
           <Route
             path="/login"
             element={
@@ -129,7 +132,7 @@ const AppContent = () => {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
 
-          {/* --- DASHBOARD UTILIZATOR (Protejat) --- */}
+          {/* --- DASHBOARD UTILIZATOR --- */}
           <Route
             path="/dashboard"
             element={
@@ -179,15 +182,17 @@ const AppContent = () => {
             }
           />
 
-          {/* --- PANOU ADMIN (Protejat + Rol Admin) --- */}
+          {/* --- PANOU ADMIN --- */}
+          {/* Redirecționare automată de la /admin la /admin/leads */}
           <Route
             path="/admin"
             element={
               <ProtectedRoute requiredRoles={["admin"]}>
-                <AdminDashboard />
+                <Navigate to="/admin/leads" replace />
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/admin/leads"
             element={
@@ -212,7 +217,6 @@ const AppContent = () => {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/admin/chat"
             element={
@@ -233,8 +237,8 @@ const AppContent = () => {
         </Routes>
       </main>
 
-      {/* Widget-urile apar pe paginile publice și dashboard, dar le ascundem în Auth și Admin */}
-      {!isAuthPath && !isAdminPath && (
+      {/* Widget-urile de chat rămân vizibile pe site-ul public, dashboard și admin (conform cerinței) */}
+      {!isAuthPath && (
         <>
           <ChatWidget />
           <WhatsAppButton />

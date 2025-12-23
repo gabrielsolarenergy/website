@@ -145,6 +145,36 @@ export const solarAPI = {
       method: "POST",
       body: JSON.stringify(data),
     }),
+  sendContactForm: async (formData: any) => {
+    try {
+      const response = await fetch(`${API_URL}/solar/contact`, {
+        // Verifică dacă endpoint-ul e /solar/contact sau /leads
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      // ACEASTA ESTE PARTEA CRITICĂ:
+      if (!response.ok) {
+        // Dacă serverul dă 404 sau 500, returnăm eroarea înainte de a încerca .json()
+        const errorText = await response.text();
+        return {
+          data: null,
+          error: errorText || `Eroare server: ${response.status}`,
+        };
+      }
+
+      // Verificăm dacă există conținut înainte de a parsa JSON-ul
+      const text = await response.text();
+      const data = text ? JSON.parse(text) : { success: true };
+
+      return { data, error: null };
+    } catch (err: any) {
+      return { data: null, error: err.message };
+    }
+  },
 };
 
 // ==================== SERVICE REQUESTS API (CLIENT) ====================
