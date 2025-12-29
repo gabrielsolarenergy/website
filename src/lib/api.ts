@@ -129,10 +129,12 @@ export const authAPI = {
 
 // ==================== SOLAR CONTENT API ====================
 export const solarAPI = {
-  getProjects: (type?: string, page: number = 1, size: number = 6) => {
+  // În lib/api.ts
+  getProjects: (category?: string, page: number = 1, size: number = 6) => {
     const query = new URLSearchParams();
-    // NOTĂ: Backend-ul FastAPI așteaptă 'type' pentru filtrare conform logurilor tale
-    if (type && type !== "Toate Proiectele") query.append("type", type);
+    // Schimbă "type" cu numele exact al coloanei din DB dacă e necesar
+    if (category && category !== "Toate Proiectele")
+      query.append("category", category);
     query.append("page", page.toString());
     query.append("size", size.toString());
     return apiRequest<any>(`/solar/projects?${query.toString()}`);
