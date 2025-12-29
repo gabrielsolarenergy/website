@@ -53,19 +53,27 @@ export default function Projects() {
     setIsLoading(true);
     setError(null);
     try {
-      // Trimitem categoria și pagina curentă către backend
+      // 1. Decidem ce trimitem la backend
+      const selectedCategory =
+        filter === "Toate Proiectele" ? undefined : filter;
+
       const { data, error } = await solarAPI.getProjects(
-        filter,
+        selectedCategory,
         currentPage,
         projectsPerPage
       );
 
       if (error) throw new Error(error);
 
-      // Mapăm datele conform structurii noi de la backend ({ items, total, ... })
-      setProjects(data.items || []);
-      setTotalItems(data.total || 0);
+      // 2. Mapare robustă a datelor (Fix pentru eroarea de afișare)
+      // Verificăm dacă data este formatul { items: [], total: 0 } sau doar un array []
+      const items = data?.items || (Array.isArray(data) ? data : []);
+      const total = data?.total || (Array.isArray(data) ? data.length : 0);
+
+      setProjects(items);
+      setTotalItems(total);
     } catch (err: any) {
+      console.error("Fetch Projects Error:", err);
       setError(err.message || "Nu s-au putut încărca proiectele.");
     } finally {
       setIsLoading(false);
