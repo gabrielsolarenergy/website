@@ -22,7 +22,6 @@ const ContentManagement = () => {
             <TabsTrigger value="projects">Proiecte</TabsTrigger>
             <TabsTrigger value="blog">Blog</TabsTrigger>
             <TabsTrigger value="chat">Mesaje</TabsTrigger>
-            <TabsTrigger value="email">Email</TabsTrigger>
           </TabsList>
 
           <TabsContent value="requests" className="mt-6">

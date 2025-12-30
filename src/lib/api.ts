@@ -23,28 +23,32 @@ async function apiRequest<T>(
   options: RequestInit = {},
   requiresAuth = false
 ): Promise<{ data?: T; error?: string; status: number }> {
+  // Verificăm dacă body-ul este FormData
   const isFormData = options.body instanceof FormData;
-  const headers: Record<string, string> = {
-    ...(options.headers as Record<string, string>),
-  };
 
-  if (!isFormData) {
-    headers["Content-Type"] = "application/json";
+  // Creăm un obiect nou pentru headers ca să nu modificăm referința originală
+  const headers = new Headers(options.headers);
+
+  // REPARAȚIE CRITICĂ:
+  // Dacă este FormData, ȘTERGEM Content-Type pentru a lăsa browserul să pună boundary-ul corect.
+  if (isFormData) {
+    headers.delete("Content-Type");
+  } else if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
   }
 
   if (requiresAuth) {
     const token = getToken();
     if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
+      headers.set("Authorization", `Bearer ${token}`);
     }
   }
 
   try {
     const response = await fetch(`${API_URL}${endpoint}`, {
       ...options,
-      headers,
+      headers, // Folosim obiectul Headers corectat
     });
-
     const data = await response.json().catch(() => null);
 
     if (!response.ok) {
@@ -129,20 +133,34 @@ export const authAPI = {
 
 // ==================== SOLAR CONTENT API ====================
 export const solarAPI = {
-  // În lib/api.ts
+  /// În lib/api.ts -> solarAPI
   getProjects: (category?: string, page: number = 1, size: number = 6) => {
     const query = new URLSearchParams();
-    // Folosește "type" dacă acesta este numele așteptat de backend,
-    // similar cu implementarea din adminAPI
+
+    // Dacă categoria e validă, o adăugăm la URL
     if (category && category !== "Toate Proiectele") {
-      query.append("type", category);
+      query.append("category", category);
     }
+
     query.append("page", page.toString());
     query.append("size", size.toString());
+
     return apiRequest<any>(`/solar/projects?${query.toString()}`);
   },
   getProject: (id: string) => apiRequest<any>(`/solar/projects/${id}`),
-  getBlogPosts: () => apiRequest<any[]>("/solar/blog"),
+  // În lib/api.ts -> solarAPI
+  // lib/api.ts
+  getBlogPosts: (category?: string, page: number = 1, size: number = 6) => {
+    const query = new URLSearchParams();
+
+    if (category && category !== "Toate postările") {
+      query.append("category", category);
+    }
+    query.append("page", page.toString());
+    query.append("size", size.toString());
+
+    return apiRequest<any>(`/solar/blog?${query.toString()}`);
+  },
   getBlogPost: (slug: string) => apiRequest<any>(`/solar/blog/${slug}`),
   submitContact: (data: any) =>
     apiRequest("/solar/contact", {
@@ -227,12 +245,13 @@ export const adminAPI = {
 
   getBlogPosts: () => apiRequest<any[]>("/admin/blog", { method: "GET" }, true),
 
+  // Corect în lib/api.ts
   createBlogPost: (data: any) =>
     apiRequest(
       "/admin/blog",
       {
         method: "POST",
-        body: JSON.stringify(data),
+        body: JSON.stringify(data), // Trimitem JSON
       },
       true
     ),
@@ -242,14 +261,13 @@ export const adminAPI = {
       `/admin/blog/${id}`,
       {
         method: "PATCH",
-        body: JSON.stringify(data),
+        body: JSON.stringify(data), // Trimitem JSON
       },
       true
     ),
 
   deleteBlogPost: (id: string) =>
     apiRequest(`/admin/blog/${id}`, { method: "DELETE" }, true),
-
   // --- Projects Management ---
   getProjects: (category?: string, page: number = 1, size: number = 50) => {
     const query = new URLSearchParams();

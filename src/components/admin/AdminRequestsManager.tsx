@@ -355,7 +355,7 @@ export const AdminRequestsManager = () => {
       </div>
 
       {/* Paginare */}
-      {totalPages > 1 && (
+      {totalPages >= 1 && (
         <div className="flex items-center justify-center gap-2 mt-8">
           <Button
             variant="outline"

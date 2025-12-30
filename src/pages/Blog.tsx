@@ -20,15 +20,6 @@ import { motion, AnimatePresence } from "framer-motion";
 // Imagine pentru fundal Hero
 import blogHeroImage from "@/assets/commercial-solar.jpg";
 
-const categories = [
-  "Toate postările",
-  "Fotovoltaice rezidențial",
-  "Soluții industriale",
-  "ROI și subvenții",
-  "Sfaturi mentenanță",
-  "Noutăți companie",
-];
-
 export default function Blog() {
   const [articles, setArticles] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -157,34 +148,6 @@ export default function Blog() {
         </div>
       </section>
 
-      {/* 2. FILTRE CATEGORII - Stil Sticky cu Scroll Orizontal */}
-      <section
-        ref={filterSectionRef}
-        className="py-4 bg-background border-b border-border sticky z-40 shadow-sm transition-all"
-        style={{ top: `${headerHeight}px` }}
-      >
-        <div className="container-section px-4">
-          <div className="flex flex-nowrap md:flex-wrap gap-2 overflow-x-auto pb-2 md:pb-0 md:justify-center no-scrollbar">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => {
-                  setSelectedCategory(category);
-                  setCurrentPage(1);
-                }}
-                className={`px-5 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
-                  selectedCategory === category
-                    ? "bg-primary text-primary-foreground shadow-md"
-                    : "bg-muted text-muted-foreground hover:bg-muted/80"
-                }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* 3. FEATURED ARTICLE - Stil Premium */}
       {!isLoading &&
         !searchQuery &&
@@ -306,7 +269,7 @@ export default function Blog() {
               )}
 
               {/* 5. PAGINARE */}
-              {!isLoading && totalPages > 1 && (
+              {!isLoading && (
                 <div className="mt-16">
                   <CustomPagination
                     currentPage={currentPage}
