@@ -49,19 +49,17 @@ export default function Blog() {
         const { data, error } = await solarAPI.getBlogPosts();
         if (error) throw new Error(error);
 
-        // Asigurăm normalizarea datelor la fetch pentru a preveni erori de mapare
+        // NORMALIZARE: Mapăm coloana 'featured_image' din Python la 'displayImage'
         const normalizedData = (data || []).map((art: any) => ({
           ...art,
-          // Ne asigurăm că avem un câmp stabil pentru imagine
           displayImage:
-            art.featured_image ||
+            art.featured_image || // Numele coloanei din modelul tău SQLAlchemy
             art.image_url ||
             art.cover_image ||
-            art.image ||
             "",
-          // Ne asigurăm că avem un câmp stabil pentru text (excerpt/body)
           displayExcerpt:
-            art.excerpt || (art.body ? art.body.substring(0, 150) + "..." : ""),
+            art.excerpt ||
+            (art.content ? art.content.substring(0, 150) + "..." : ""),
         }));
 
         setArticles(normalizedData);
@@ -74,19 +72,20 @@ export default function Blog() {
     fetchArticles();
   }, []);
 
-  // --- HELPER IMAGINE ---
+  // --- HELPER IMAGINE (Link din Bucket Railway) ---
   const getArticleImage = (article: any) => {
     const img = article.displayImage;
 
+    // 1. Dacă nu există imagine, punem un placeholder de calitate
     if (!img)
       return "https://images.unsplash.com/photo-1509391366360-feaffa64829b?q=80&w=800";
 
-    // Dacă este un link de bucket (conține http), îl dăm direct
+    // 2. Dacă este URL de Bucket (începe cu http), îl returnăm direct
     if (typeof img === "string" && img.startsWith("http")) {
       return img;
     }
 
-    // Fallback pentru Base64 (dacă imaginile sunt salvate ca text lung în DB)
+    // 3. Dacă este Base64
     if (
       typeof img === "string" &&
       img.length > 100 &&
@@ -102,7 +101,7 @@ export default function Blog() {
     e: React.SyntheticEvent<HTMLImageElement, Event>
   ) => {
     e.currentTarget.src =
-      "https://images.unsplash.com/photo-1509391366360-feaffa64829b?q=80&w=800&auto=format&fit=crop";
+      "https://images.unsplash.com/photo-1509391366360-feaffa64829b?q=80&w=800";
   };
 
   // --- FILTRARE ---
@@ -148,7 +147,6 @@ export default function Blog() {
           />
           <div className="absolute inset-0 bg-black/60 md:bg-gradient-to-r md:from-black/80 md:to-transparent" />
         </div>
-
         <div className="container-section relative z-10 w-full pt-20 px-4">
           <div className="max-w-4xl">
             <h1 className="font-display font-bold text-white mb-6 leading-tight text-4xl md:text-6xl lg:text-7xl">
@@ -189,8 +187,8 @@ export default function Blog() {
                 }}
                 className={`px-5 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
                   selectedCategory === category
-                    ? "bg-primary text-primary-foreground shadow-md"
-                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
                 }`}
               >
                 {category}
@@ -200,50 +198,7 @@ export default function Blog() {
         </div>
       </section>
 
-      {/* Featured Article */}
-      {!isLoading &&
-        !searchQuery &&
-        selectedCategory === "Toate postările" &&
-        currentPage === 1 &&
-        featuredArticle && (
-          <section className="py-12 bg-background">
-            <div className="container-section px-4">
-              <div className="flex items-center gap-2 mb-6 text-primary font-bold uppercase text-xs tracking-widest">
-                <Star className="w-4 h-4 fill-accent text-accent" /> Recomandare
-              </div>
-              <div className="grid lg:grid-cols-2 bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-xl">
-                <div className="relative aspect-video lg:aspect-auto min-h-[300px]">
-                  <img
-                    src={getArticleImage(featuredArticle)}
-                    alt={featuredArticle.title}
-                    onError={handleImageError}
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                </div>
-                <div className="p-8 md:p-12 flex flex-col justify-center">
-                  <span className="text-accent font-bold text-xs uppercase mb-3">
-                    {featuredArticle.category}
-                  </span>
-                  <h2 className="text-2xl md:text-4xl font-bold mb-4">
-                    {featuredArticle.title}
-                  </h2>
-                  <p className="text-muted-foreground mb-8 line-clamp-3">
-                    {featuredArticle.displayExcerpt}
-                  </p>
-                  <Button variant="hero" className="w-fit" asChild>
-                    <Link
-                      to={`/blog/${featuredArticle.slug || featuredArticle.id}`}
-                    >
-                      Citește articolul <ArrowRight className="ml-2 w-4 h-4" />
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-
-      {/* Articles Grid */}
+      {/* Grid Articole */}
       <section className="py-12 bg-background">
         <div className="container-section px-4">
           <h2 className="text-2xl font-bold mb-8 uppercase tracking-tighter">
@@ -253,10 +208,10 @@ export default function Blog() {
           </h2>
 
           {isLoading ? (
-            <div className="flex flex-col items-center py-20">
-              <Loader2 className="w-10 h-10 text-primary animate-spin" />
+            <div className="flex justify-center py-20">
+              <Loader2 className="animate-spin text-primary" />
             </div>
-          ) : currentArticles.length > 0 ? (
+          ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {currentArticles.map((article) => (
                 <article
@@ -275,16 +230,15 @@ export default function Blog() {
                     <div className="flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase mb-3">
                       <span className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />{" "}
-                        {new Date(
-                          article.created_at || article.date || Date.now()
-                        ).toLocaleDateString("ro-RO")}
+                        {new Date(article.created_at).toLocaleDateString(
+                          "ro-RO"
+                        )}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />{" "}
-                        {article.read_time || "5 min"}
+                        <Clock className="w-3 h-3" /> 5 min
                       </span>
                     </div>
-                    <h3 className="text-lg font-bold mb-3 group-hover:text-primary transition-colors line-clamp-2">
+                    <h3 className="text-lg font-bold mb-3 line-clamp-2">
                       {article.title}
                     </h3>
                     <p className="text-sm text-muted-foreground mb-6 line-clamp-2 flex-1">
@@ -299,23 +253,6 @@ export default function Blog() {
                   </div>
                 </article>
               ))}
-            </div>
-          ) : (
-            <div className="text-center py-20 bg-slate-50 rounded-2xl border-2 border-dashed">
-              <p className="text-slate-500">
-                Nu am găsit articole care să corespundă criteriilor.
-              </p>
-            </div>
-          )}
-
-          {/* Pagination */}
-          {!isLoading && totalPages > 1 && (
-            <div className="mt-16">
-              <CustomPagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-              />
             </div>
           )}
         </div>
