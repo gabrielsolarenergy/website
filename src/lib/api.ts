@@ -132,9 +132,11 @@ export const solarAPI = {
   // În lib/api.ts
   getProjects: (category?: string, page: number = 1, size: number = 6) => {
     const query = new URLSearchParams();
-    // Schimbă "type" cu numele exact al coloanei din DB dacă e necesar
-    if (category && category !== "Toate Proiectele")
-      query.append("category", category);
+    // Folosește "type" dacă acesta este numele așteptat de backend,
+    // similar cu implementarea din adminAPI
+    if (category && category !== "Toate Proiectele") {
+      query.append("type", category);
+    }
     query.append("page", page.toString());
     query.append("size", size.toString());
     return apiRequest<any>(`/solar/projects?${query.toString()}`);

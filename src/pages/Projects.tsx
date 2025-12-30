@@ -53,7 +53,6 @@ export default function Projects() {
     setIsLoading(true);
     setError(null);
     try {
-      // Trimitem undefined dacă este "Toate Proiectele" pentru a nu polua query-ul
       const selectedCategory =
         filter === "Toate Proiectele" ? undefined : filter;
 
@@ -65,8 +64,7 @@ export default function Projects() {
 
       if (error) throw new Error(error);
 
-      // MAPARE ROBUSTĂ: Backend-ul poate returna {items, total} SAU direct un array []
-      // Aceasta este cea mai comună cauză pentru care nu se afișează nimic
+      // Mapare robustă: verificăm ambele formate posibile de răspuns
       const items = data?.items || (Array.isArray(data) ? data : []);
       const total = data?.total || (Array.isArray(data) ? data.length : 0);
 
@@ -79,10 +77,6 @@ export default function Projects() {
       setIsLoading(false);
     }
   };
-  // Re-executăm fetch-ul când se schimbă filtrul sau pagina
-  useEffect(() => {
-    fetchProjects();
-  }, [filter, currentPage]);
 
   const totalPages = Math.ceil(totalItems / projectsPerPage) || 1;
   const filterSectionRef = useAutofocus<HTMLElement>([filter]);
