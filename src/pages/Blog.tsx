@@ -48,7 +48,23 @@ export default function Blog() {
       try {
         const { data, error } = await solarAPI.getBlogPosts();
         if (error) throw new Error(error);
-        setArticles(data || []);
+
+        // Asigurăm normalizarea datelor la fetch pentru a preveni erori de mapare
+        const normalizedData = (data || []).map((art: any) => ({
+          ...art,
+          // Ne asigurăm că avem un câmp stabil pentru imagine
+          displayImage:
+            art.featured_image ||
+            art.image_url ||
+            art.cover_image ||
+            art.image ||
+            "",
+          // Ne asigurăm că avem un câmp stabil pentru text (excerpt/body)
+          displayExcerpt:
+            art.excerpt || (art.body ? art.body.substring(0, 150) + "..." : ""),
+        }));
+
+        setArticles(normalizedData);
       } catch (err: any) {
         setError(err.message || "Nu s-au putut încărca articolele.");
       } finally {
@@ -58,9 +74,28 @@ export default function Blog() {
     fetchArticles();
   }, []);
 
-  // --- HELPER IMAGINE (Rezolvă problema afișării) ---
+  // --- HELPER IMAGINE ---
   const getArticleImage = (article: any) => {
-    return article.featured_image || article.image_url || article.image;
+    const img = article.displayImage;
+
+    if (!img)
+      return "https://images.unsplash.com/photo-1509391366360-feaffa64829b?q=80&w=800";
+
+    // Dacă este un link de bucket (conține http), îl dăm direct
+    if (typeof img === "string" && img.startsWith("http")) {
+      return img;
+    }
+
+    // Fallback pentru Base64 (dacă imaginile sunt salvate ca text lung în DB)
+    if (
+      typeof img === "string" &&
+      img.length > 100 &&
+      !img.startsWith("data:")
+    ) {
+      return `data:image/jpeg;base64,${img}`;
+    }
+
+    return img;
   };
 
   const handleImageError = (
@@ -77,8 +112,10 @@ export default function Blog() {
       article.category === selectedCategory;
     const matchesSearch =
       article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (article.excerpt &&
-        article.excerpt.toLowerCase().includes(searchQuery.toLowerCase()));
+      (article.displayExcerpt &&
+        article.displayExcerpt
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()));
     return matchesCategory && matchesSearch;
   });
 
@@ -105,7 +142,7 @@ export default function Blog() {
         <div className="absolute inset-0 z-0">
           <img
             src={blogHeroImage}
-            alt="Blog"
+            alt="Blog background"
             className="w-full h-full object-cover"
             loading="eager"
           />
@@ -135,7 +172,7 @@ export default function Blog() {
         </div>
       </section>
 
-      {/* Category Filters (RESPONSIVE: Scroll orizontal pe mobil) */}
+      {/* Category Filters */}
       <section
         ref={filterSectionRef}
         className="py-4 bg-background border-b border-border sticky z-40 shadow-sm"
@@ -191,7 +228,7 @@ export default function Blog() {
                     {featuredArticle.title}
                   </h2>
                   <p className="text-muted-foreground mb-8 line-clamp-3">
-                    {featuredArticle.excerpt}
+                    {featuredArticle.displayExcerpt}
                   </p>
                   <Button variant="hero" className="w-fit" asChild>
                     <Link
@@ -206,7 +243,7 @@ export default function Blog() {
           </section>
         )}
 
-      {/* Articles Grid (RESPONSIVE: 1 coloană mobil, 2 tableta, 3 desktop) */}
+      {/* Articles Grid */}
       <section className="py-12 bg-background">
         <div className="container-section px-4">
           <h2 className="text-2xl font-bold mb-8 uppercase tracking-tighter">
@@ -221,7 +258,7 @@ export default function Blog() {
             </div>
           ) : currentArticles.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {currentArticles.map((article, index) => (
+              {currentArticles.map((article) => (
                 <article
                   key={article.id}
                   className="group bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-lg transition-all flex flex-col"
@@ -239,7 +276,7 @@ export default function Blog() {
                       <span className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />{" "}
                         {new Date(
-                          article.created_at || article.date
+                          article.created_at || article.date || Date.now()
                         ).toLocaleDateString("ro-RO")}
                       </span>
                       <span className="flex items-center gap-1">
@@ -251,7 +288,7 @@ export default function Blog() {
                       {article.title}
                     </h3>
                     <p className="text-sm text-muted-foreground mb-6 line-clamp-2 flex-1">
-                      {article.excerpt}
+                      {article.displayExcerpt}
                     </p>
                     <Link
                       to={`/blog/${article.slug || article.id}`}
