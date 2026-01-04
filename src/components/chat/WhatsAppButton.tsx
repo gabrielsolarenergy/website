@@ -7,7 +7,7 @@ interface WhatsAppButtonProps {
 
 const WhatsAppButton = ({
   phoneNumber = "40741811364",
-  message = "Hello! I am interested in solar panel installation.",
+  message = "Salut! Sunt interesat in serviciile tale.",
 }: WhatsAppButtonProps) => {
   const handleClick = () => {
     const encodedMessage = encodeURIComponent(message);
@@ -32,7 +32,7 @@ const WhatsAppButton = ({
 
       {/* Tooltip */}
       <span className="absolute left-full ml-3 px-3 py-2 bg-card text-foreground text-sm font-medium rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-border">
-        Chat on WhatsApp
+        Vorbește pe WhatsApp
       </span>
     </button>
   );
